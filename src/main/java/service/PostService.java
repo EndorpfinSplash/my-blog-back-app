@@ -29,4 +29,10 @@ public class PostService {
         postRepository.update(id, post);
     }
 
+    public List<Post> findPosts(String search,
+                                int pageNumber,
+                                int pageSize) {
+
+        return null;
+    }
 }

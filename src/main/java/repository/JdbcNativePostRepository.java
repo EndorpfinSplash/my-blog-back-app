@@ -18,8 +18,7 @@ public class JdbcNativePostRepository implements PostRepository {
 
     @Override
     public List<Post> findAll() {
-        // Выполняем запрос с помощью JdbcTemplate
-        // Преобразовываем ответ с помощью RowMapper
+
         return jdbcTemplate.query(
                 "select id, title, text from post",
                 (rs, rowNum) -> new Post(
@@ -30,8 +29,19 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public List<Post> findAllByTitleContains(String search, int pageNumber, int pageSize) {
+        return jdbcTemplate.query(
+                "select id, title, text from post where title ilike ?",
+                new Object[]{"%" + search + "%"},
+                (rs, rowNum) -> new Post(
+                        rs.getLong("id"),
+                        rs.getString("title"),
+                        rs.getString("text")
+                ));
+    }
+
+    @Override
     public void save(Post post) {
-        // Формируем insert-запрос с параметрами
         jdbcTemplate.update("insert into post(title, text) values(?, ?)",
                 post.getTitle(), post.getText());
     }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import service.PostService;
 
@@ -21,10 +22,11 @@ public class PostController {
 
     private final PostService service;
 
-
     @GetMapping
-    public List<Post> getPosts() {
-        return service.findAll();
+    public List<Post> getPosts(@RequestParam String search,
+                               @RequestParam int pageNumber,
+                               @RequestParam int pageSize) {
+        return service.findPosts(search, pageNumber, pageSize);
     }
 
     @PostMapping
