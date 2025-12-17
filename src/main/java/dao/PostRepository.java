@@ -1,12 +1,13 @@
 package dao;
 
+import dto.PostDto;
 import model.Post;
 
 import java.util.List;
 
 public interface PostRepository {
     List<Post> findAll();
-    List<Post> findAllByTitleContains(String search, int pageNumber, int pageSize);
+    List<PostDto> findAllByTitleContains(String search);
     void save(Post post);
     void deleteById(Long id);
 

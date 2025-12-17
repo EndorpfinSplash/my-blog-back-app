@@ -1,6 +1,8 @@
 package service;
 
 import dao.PostRepository;
+import dto.PostDto;
+import dto.PostsResponse;
 import lombok.AllArgsConstructor;
 import model.Post;
 import org.springframework.stereotype.Service;
@@ -29,10 +31,13 @@ public class PostService {
         postRepository.update(id, post);
     }
 
-    public List<Post> findPosts(String search,
-                                int pageNumber,
-                                int pageSize) {
+    public PostsResponse findPosts(String search,
+                                   int pageNumber,
+                                   int pageSize) {
+        List<PostDto> posts = postRepository.findAllByTitleContains(search);
 
-        return null;
+        return PostsResponse.builder()
+                .posts(posts)
+                .build();
     }
 }

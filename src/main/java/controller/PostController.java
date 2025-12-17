@@ -1,5 +1,6 @@
 package controller;
 
+import dto.PostsResponse;
 import lombok.AllArgsConstructor;
 import model.Post;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import service.PostService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/posts")
 @AllArgsConstructor
@@ -23,9 +22,9 @@ public class PostController {
     private final PostService service;
 
     @GetMapping
-    public List<Post> getPosts(@RequestParam String search,
-                               @RequestParam int pageNumber,
-                               @RequestParam int pageSize) {
+    public PostsResponse getPosts(@RequestParam String search,
+                                  @RequestParam int pageNumber,
+                                  @RequestParam int pageSize) {
         return service.findPosts(search, pageNumber, pageSize);
     }
 

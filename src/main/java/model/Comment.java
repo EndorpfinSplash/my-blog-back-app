@@ -5,9 +5,8 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Post {
+public class Comment {
     private Long id;
-    private String title;
     private String text;
-    private Long likesCount;
+    private Long postId;
 }
