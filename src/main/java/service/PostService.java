@@ -35,9 +35,12 @@ public class PostService {
                                    int pageNumber,
                                    int pageSize) {
         List<PostDto> posts = postRepository.findAllByTitleContains(search);
-
+        int lastPage = (int) Math.ceil((double) posts.size() / pageSize);
         return PostsResponse.builder()
                 .posts(posts)
+                .hasNext(lastPage<pageNumber)
+                .hasPrev(pageNumber>1)
+                .lastPage(lastPage)
                 .build();
     }
 }
