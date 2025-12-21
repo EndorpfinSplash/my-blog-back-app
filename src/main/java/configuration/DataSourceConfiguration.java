@@ -16,7 +16,6 @@ import java.sql.Driver;
 @Configuration
 public class DataSourceConfiguration {
 
-    // Настройка DataSource — компонент, отвечающий за соединение с базой данных
     @Bean
     public DataSource dataSource(
             // Настройки соединения возьмём из Environment

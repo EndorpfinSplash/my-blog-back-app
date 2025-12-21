@@ -1,5 +1,6 @@
 package controller;
 
+import dto.NewPostDto;
 import dto.PostsResponse;
 import lombok.AllArgsConstructor;
 import model.Post;
@@ -29,8 +30,8 @@ public class PostController {
     }
 
     @PostMapping
-    public void save(@RequestBody Post post) {
-        service.save(post);
+    public void save(@RequestBody NewPostDto newPostDto) {
+        service.save(newPostDto);
     }
 
     @DeleteMapping(value = "/{id}")

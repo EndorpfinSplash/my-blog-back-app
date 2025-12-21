@@ -1,9 +1,11 @@
 package service;
 
 import dao.PostRepository;
+import dto.NewPostDto;
 import dto.PostDto;
 import dto.PostsResponse;
 import lombok.AllArgsConstructor;
+import mapper.PostMapper;
 import model.Post;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +16,14 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
     public List<Post> findAll() {
         return postRepository.findAll();
     }
 
-    public void save(Post post) {
+    public void save(NewPostDto newPostDto) {
+        Post post = postMapper.toEntity(newPostDto);
         postRepository.save(post);
     }
 
@@ -38,7 +42,7 @@ public class PostService {
         int lastPage = (int) Math.ceil((double) posts.size() / pageSize);
         return PostsResponse.builder()
                 .posts(posts)
-                .hasNext(lastPage<pageNumber)
+                .hasNext(pageNumber<lastPage)
                 .hasPrev(pageNumber>1)
                 .lastPage(lastPage)
                 .build();
