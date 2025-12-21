@@ -5,8 +5,11 @@ import dto.PostDto;
 import lombok.AllArgsConstructor;
 import model.Post;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
@@ -61,9 +64,24 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public void save(Post post) {
-        jdbcTemplate.update("insert into post(title, text) values(?, ?)",
-                post.getTitle(), post.getText());
+    public Post save(Post post) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO post(title, text) VALUES (?, ?)",
+                    new String[]{"id"}
+            );
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getText());
+            return ps;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        if (key != null) {
+            post.setId(key.longValue());
+        }
+        return post;
     }
 
     @Override
@@ -72,9 +90,13 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public void update(Long id, Post post) {
+    public Post update(Long id, Post post) {
         jdbcTemplate.update("update post set title = ?, text = ? where id = ?",
-                post.getTitle(), post.getText(), id);
+                post.getTitle(),
+                post.getText(),
+                id
+        );
+        return post;
     }
 
 }

@@ -1,6 +1,7 @@
 package mapper;
 
 import dto.NewPostDto;
+import dto.PostDto;
 import model.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,4 +13,6 @@ public interface PostMapper {
     @Mapping(target = "likesCount", constant = "0L")
     @Mapping(target = "commentCount", constant = "0L")
     Post toEntity(NewPostDto newPostDto);
+
+    PostDto toDto(Post post);
 }

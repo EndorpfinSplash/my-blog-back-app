@@ -22,9 +22,9 @@ public class PostService {
         return postRepository.findAll();
     }
 
-    public void save(NewPostDto newPostDto) {
+    public PostDto save(NewPostDto newPostDto) {
         Post post = postMapper.toEntity(newPostDto);
-        postRepository.save(post);
+        return postMapper.toDto(postRepository.save(post));
     }
 
     public void deleteById(Long id) {
