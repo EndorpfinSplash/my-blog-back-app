@@ -4,7 +4,7 @@ create table if not exists post
     title       varchar(256) not null,
     text        varchar(256) not null,
     tags        text[],
-    likes_count integer
+    likes_count integer default 0
 );
 
 create table if not exists comment

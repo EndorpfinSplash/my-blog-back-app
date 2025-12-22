@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class JdbcNativePostRepository implements PostRepository {
                         rs.getLong("id"),
                         rs.getString("title"),
                         rs.getString("text"),
-                        (List<String>) rs.getArray("tags"),
+                        List.of((String[]) rs.getArray("tags").getArray()),
                         rs.getLong("likes_count"),
                         rs.getLong("comment_count")
                 ));
@@ -57,7 +58,7 @@ public class JdbcNativePostRepository implements PostRepository {
                         rs.getString("id"),
                         rs.getString("title"),
                         rs.getString("text"),
-                        (List<String>) rs.getArray("tags"),
+                        List.of((String[]) rs.getArray("tags").getArray()),
                         rs.getLong("comment_count"),
                         rs.getLong("likes_count")
                 ));
@@ -69,11 +70,16 @@ public class JdbcNativePostRepository implements PostRepository {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO post(title, text) VALUES (?, ?)",
+                    "INSERT INTO post(title, text, tags) VALUES (?, ?, ?)",
                     new String[]{"id"}
             );
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getText());
+
+            Array sqlArray = connection.createArrayOf("text",
+                    post.getTags().toArray(new String[0])
+            );
+            ps.setArray(3, sqlArray);
             return ps;
         }, keyHolder);
 
@@ -91,11 +97,25 @@ public class JdbcNativePostRepository implements PostRepository {
 
     @Override
     public Post update(Long id, Post post) {
-        jdbcTemplate.update("update post set title = ?, text = ? where id = ?",
-                post.getTitle(),
-                post.getText(),
-                id
-        );
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    """
+                        update post
+                        set title = ?, text = ? , tags= ?
+                        where id = ?
+                        """,
+                    new String[]{"id"}
+            );
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getText());
+
+            Array sqlArray = connection.createArrayOf("text",
+                    post.getTags().toArray(new String[0])
+            );
+            ps.setArray(3, sqlArray);
+            ps.setLong(4, id);
+            return ps;
+        });
         return post;
     }
 
