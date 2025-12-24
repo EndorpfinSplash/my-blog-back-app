@@ -4,6 +4,7 @@ import dto.NewPostDto;
 import dto.PostDto;
 import dto.PostsResponse;
 import lombok.AllArgsConstructor;
+import model.Comment;
 import model.Post;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import service.PostService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -36,13 +39,23 @@ public class PostController {
     }
 
     @DeleteMapping(value = "/{id}")
-    public void delete(@PathVariable(name = "id") Long id) {
+    public void delete(@PathVariable Long id) {
         service.deleteById(id);
     }
 
     @PutMapping("/{id}")
-    public void update(@PathVariable(name = "id") Long id, @RequestBody Post post) {
+    public void update(@PathVariable Long id, @RequestBody Post post) {
         service.update(id, post);
+    }
+
+    @PostMapping("/{id}/likes")
+    public Long incrementLike(@PathVariable Long id) {
+        return  service.incrementLike(id);
+    }
+
+    @GetMapping("/{id}/comments")
+    public List<Comment> getComments(@PathVariable("id") Long postId) {
+        return  service.getCommentsByPostId(postId);
     }
 
 }

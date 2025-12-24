@@ -6,6 +6,7 @@ import dto.PostDto;
 import dto.PostsResponse;
 import lombok.AllArgsConstructor;
 import mapper.PostMapper;
+import model.Comment;
 import model.Post;
 import org.springframework.stereotype.Service;
 
@@ -46,5 +47,17 @@ public class PostService {
                 .hasPrev(pageNumber>1)
                 .lastPage(lastPage)
                 .build();
+    }
+
+    public Long incrementLike(Long id) {
+        Post post = postRepository.findById(id);
+        long likesCountIncreased = post.getLikesCount() + 1L;
+        post.setLikesCount(likesCountIncreased);
+        postRepository.save(post);
+        return likesCountIncreased;
+    }
+
+    public List<Comment> getCommentsByPostId(Long postId) {
+        return postRepository.findAllCommentsByPostId(postId);
     }
 }

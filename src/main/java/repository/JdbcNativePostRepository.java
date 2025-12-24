@@ -3,6 +3,7 @@ package repository;
 import dao.PostRepository;
 import dto.PostDto;
 import lombok.AllArgsConstructor;
+import model.Comment;
 import model.Post;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -100,10 +101,10 @@ public class JdbcNativePostRepository implements PostRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
                     """
-                        update post
-                        set title = ?, text = ? , tags= ?
-                        where id = ?
-                        """,
+                            update post
+                            set title = ?, text = ? , tags= ?
+                            where id = ?
+                            """,
                     new String[]{"id"}
             );
             ps.setString(1, post.getTitle());
@@ -117,6 +118,47 @@ public class JdbcNativePostRepository implements PostRepository {
             return ps;
         });
         return post;
+    }
+
+    @Override
+    public Post findById(Long id) {
+        String sql = """
+                select p.id, p.title, p.text, p.likes_count, p.tags,
+                       count(c.id) as comment_count
+                from post p
+                left join comment c on p.id = c.post_id
+                where p.id = ?
+                group by p.id, p.title, p.text, p.likes_count, p.tags
+                """;
+        Post post = jdbcTemplate.queryForObject(
+                sql,
+                new Object[]{id},
+                (rs, rowNum) -> new Post(
+                        rs.getLong("id"),
+                        rs.getString("title"),
+                        rs.getString("text"),
+                        List.of((String[]) rs.getArray("tags").getArray()),
+                        rs.getLong("comment_count"),
+                        rs.getLong("likes_count")
+                ));
+        return post;
+    }
+
+    @Override
+    public List<Comment> findAllCommentsByPostId(Long postId) {
+        String sql = """
+                select c.id, c.text, c.post_id
+                from comment c
+                where c.post_id = ?
+                """;
+        return jdbcTemplate.query(
+                sql,
+                new Object[]{postId},
+                (rs, rowNum) -> new Comment(
+                        rs.getLong("id"),
+                        rs.getString("text"),
+                        rs.getLong("post_id")
+                ));
     }
 
 }
