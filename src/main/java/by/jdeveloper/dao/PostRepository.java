@@ -1,8 +1,8 @@
-package dao;
+package by.jdeveloper.dao;
 
-import dto.PostDto;
-import model.Comment;
-import model.Post;
+import by.jdeveloper.dto.PostDto;
+import by.jdeveloper.model.Comment;
+import by.jdeveloper.model.Post;
 
 import java.util.List;
 

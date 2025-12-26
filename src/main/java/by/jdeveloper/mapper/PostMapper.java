@@ -1,12 +1,12 @@
-package mapper;
+package by.jdeveloper.mapper;
 
-import dto.NewPostDto;
-import dto.PostDto;
-import model.Post;
+import by.jdeveloper.dto.NewPostDto;
+import by.jdeveloper.dto.PostDto;
+import by.jdeveloper.model.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface PostMapper {
 
     @Mapping(target = "id", ignore = true)

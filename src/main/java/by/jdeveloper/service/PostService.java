@@ -1,13 +1,13 @@
-package service;
+package by.jdeveloper.service;
 
-import dao.PostRepository;
-import dto.NewPostDto;
-import dto.PostDto;
-import dto.PostsResponse;
+import by.jdeveloper.dao.PostRepository;
+import by.jdeveloper.dto.NewPostDto;
+import by.jdeveloper.dto.PostDto;
+import by.jdeveloper.dto.PostsResponse;
 import lombok.AllArgsConstructor;
-import mapper.PostMapper;
-import model.Comment;
-import model.Post;
+import by.jdeveloper.mapper.PostMapper;
+import by.jdeveloper.model.Comment;
+import by.jdeveloper.model.Post;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

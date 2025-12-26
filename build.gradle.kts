@@ -20,22 +20,23 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("org.springframework:spring-framework-bom:6.1.14"))
+    implementation(platform("org.springframework:spring-framework-bom:6.2.13"))
 
-    implementation("org.springframework:spring-core")
-    implementation("org.springframework:spring-context")
-    implementation("org.springframework:spring-beans")
+    implementation("org.springframework:spring-core:6.2.13")
+    implementation("org.springframework:spring-context:6.2.13")
+    implementation("org.springframework:spring-beans:6.2.13")
 
     // Spring Web (MVC)
-    implementation("org.springframework:spring-web")
-    implementation("org.springframework:spring-webmvc")
+    implementation("org.springframework:spring-web:6.2.13")
+    implementation("org.springframework:spring-webmvc:6.2.13")
 
     // Spring Data JDBC
     implementation("org.springframework.data:spring-data-jdbc:4.0.1")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
 
-    runtimeOnly("org.postgresql:postgresql:42.7.8")
+    implementation("org.postgresql:postgresql:42.7.3")
+
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

@@ -1,11 +1,11 @@
-package controller;
+package by.jdeveloper.controller;
 
-import dto.NewPostDto;
-import dto.PostDto;
-import dto.PostsResponse;
+import by.jdeveloper.dto.NewPostDto;
+import by.jdeveloper.dto.PostDto;
+import by.jdeveloper.dto.PostsResponse;
 import lombok.AllArgsConstructor;
-import model.Comment;
-import model.Post;
+import by.jdeveloper.model.Comment;
+import by.jdeveloper.model.Post;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import service.PostService;
+import by.jdeveloper.service.PostService;
 
 import java.util.List;
 

@@ -1,19 +1,16 @@
-package model;
+package by.jdeveloper.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@Getter
 @AllArgsConstructor
-public class Post {
-    private Long id;
+@NoArgsConstructor
+public class NewPostDto {
     private String title;
     private String text;
     private List<String> tags;
-    private Long likesCount = 0L;
-    private Long commentCount = 0L;
 }

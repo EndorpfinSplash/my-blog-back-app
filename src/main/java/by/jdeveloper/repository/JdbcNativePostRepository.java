@@ -1,10 +1,10 @@
-package repository;
+package by.jdeveloper.repository;
 
-import dao.PostRepository;
-import dto.PostDto;
+import by.jdeveloper.dao.PostRepository;
+import by.jdeveloper.dto.PostDto;
 import lombok.AllArgsConstructor;
-import model.Comment;
-import model.Post;
+import by.jdeveloper.model.Comment;
+import by.jdeveloper.model.Post;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
