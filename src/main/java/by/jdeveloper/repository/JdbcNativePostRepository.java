@@ -71,11 +71,12 @@ public class JdbcNativePostRepository implements PostRepository {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO post(title, text, tags) VALUES (?, ?, ?)",
+                    "INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
                     new String[]{"id"}
             );
             ps.setString(1, post.getTitle());
             ps.setString(2, post.getText());
+            ps.setLong(4, post.getLikesCount());
 
             Array sqlArray = connection.createArrayOf("text",
                     post.getTags().toArray(new String[0])

@@ -3,11 +3,12 @@ package by.jdeveloper.service;
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewPostDto;
 import by.jdeveloper.dto.PostDto;
+import by.jdeveloper.dto.PostUpdateDto;
 import by.jdeveloper.dto.PostsResponse;
-import lombok.AllArgsConstructor;
 import by.jdeveloper.mapper.PostMapper;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,8 +33,9 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
-    public void update(Long id, Post post) {
-        postRepository.update(id, post);
+    public PostDto update(Long id, PostUpdateDto postUpdated) {
+        Post post = postMapper.toPost(postUpdated);
+        return postMapper.toDto(postRepository.update(id, post));
     }
 
     public PostsResponse findPosts(String search,
@@ -43,21 +45,25 @@ public class PostService {
         int lastPage = (int) Math.ceil((double) posts.size() / pageSize);
         return PostsResponse.builder()
                 .posts(posts)
-                .hasNext(pageNumber<lastPage)
-                .hasPrev(pageNumber>1)
+                .hasNext(pageNumber < lastPage)
+                .hasPrev(pageNumber > 1)
                 .lastPage(lastPage)
                 .build();
     }
 
-    public Long incrementLike(Long id) {
-        Post post = postRepository.findById(id);
+    public Long incrementLike(Long postId) {
+        Post post = postRepository.findById(postId);
         long likesCountIncreased = post.getLikesCount() + 1L;
         post.setLikesCount(likesCountIncreased);
-        postRepository.save(post);
+        postRepository.update(postId, post);
         return likesCountIncreased;
     }
 
     public List<Comment> getCommentsByPostId(Long postId) {
         return postRepository.findAllCommentsByPostId(postId);
+    }
+
+    public PostDto findById(Long id) {
+        return postMapper.toDto(postRepository.findById(id));
     }
 }

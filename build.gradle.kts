@@ -6,6 +6,17 @@ plugins {
     kotlin("plugin.spring") version "1.9.25"
 }
 
+tasks.war {
+    archiveFileName.set("ROOT.war")
+}
+
+tasks.register<Copy>("deployWar") {
+    dependsOn("war") // сначала собрать WAR
+    from(tasks.named("war")) // взять артефакт
+    into("C:/apache-tomcat-10.1.49/webapps") // путь к webapps Tomcat
+}
+
+
 group = "by.jdeveloper"
 version = "1.0-SNAPSHOT"
 

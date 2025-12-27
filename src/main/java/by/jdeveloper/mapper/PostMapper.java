@@ -2,6 +2,7 @@ package by.jdeveloper.mapper;
 
 import by.jdeveloper.dto.NewPostDto;
 import by.jdeveloper.dto.PostDto;
+import by.jdeveloper.dto.PostUpdateDto;
 import by.jdeveloper.model.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,4 +16,6 @@ public interface PostMapper {
     Post toEntity(NewPostDto newPostDto);
 
     PostDto toDto(Post post);
+
+    Post toPost(PostUpdateDto postUpdated);
 }
