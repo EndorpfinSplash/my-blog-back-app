@@ -34,7 +34,10 @@ public class PostService {
     }
 
     public PostDto update(Long id, PostUpdateDto postUpdated) {
-        Post post = postMapper.toPost(postUpdated);
+        Post post = postRepository.findById(id);
+        post.setTitle(postUpdated.getTitle());
+        post.setText(postUpdated.getText());
+        post.setTags(postUpdated.getTags());
         return postMapper.toDto(postRepository.update(id, post));
     }
 
@@ -53,10 +56,8 @@ public class PostService {
 
     public Long incrementLike(Long postId) {
         Post post = postRepository.findById(postId);
-        long likesCountIncreased = post.getLikesCount() + 1L;
-        post.setLikesCount(likesCountIncreased);
-        postRepository.update(postId, post);
-        return likesCountIncreased;
+        Long likesCountIncreased = post.getLikesCount() + 1;
+        return postRepository.likesIncrease(postId, likesCountIncreased);
     }
 
     public List<Comment> getCommentsByPostId(Long postId) {

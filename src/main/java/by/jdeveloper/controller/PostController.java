@@ -49,7 +49,7 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public PostDto update(@PathVariable("id") Long id, @RequestBody PostUpdateDto postUpdated) {
+    public PostDto update(@PathVariable(name = "id") Long id, @RequestBody PostUpdateDto postUpdated) {
         return service.update(id, postUpdated);
     }
 

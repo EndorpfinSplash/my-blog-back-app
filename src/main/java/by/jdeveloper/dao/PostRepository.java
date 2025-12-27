@@ -17,4 +17,6 @@ public interface PostRepository {
     Post findById(Long id);
 
     List<Comment> findAllCommentsByPostId(Long postId);
+
+    Long likesIncrease(Long postId, Long likesCountIncreased);
 }

@@ -2,9 +2,9 @@ package by.jdeveloper.repository;
 
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.PostDto;
-import lombok.AllArgsConstructor;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -160,6 +160,17 @@ public class JdbcNativePostRepository implements PostRepository {
                         rs.getString("text"),
                         rs.getLong("post_id")
                 ));
+    }
+
+    @Override
+    public Long likesIncrease(Long postId, Long likesCountIncreased) {
+        jdbcTemplate.update("""
+                        update post set likes_count = ?
+                        where id = ?
+                        """,
+                likesCountIncreased,
+                postId);
+        return likesCountIncreased;
     }
 
 }
