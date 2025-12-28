@@ -60,9 +60,7 @@ public class PostService {
     }
 
     public Long incrementLike(Long postId) {
-        Post post = postRepository.findById(postId);
-        Long likesCountIncreased = post.getLikesCount() + 1;
-        return postRepository.likesIncrease(postId, likesCountIncreased);
+        return postRepository.likesIncrease(postId);
     }
 
     public PostDto findById(Long id) {

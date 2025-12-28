@@ -60,6 +60,8 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
     implementation("org.slf4j:slf4j-simple:2.0.12")
+
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
 }
 
 tasks.test {

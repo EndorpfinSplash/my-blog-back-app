@@ -41,7 +41,8 @@ public class JdbcNativePostRepository implements PostRepository {
                         List.of((String[]) rs.getArray("tags").getArray()),
                         rs.getLong("likes_count"),
                         rs.getLong("comment_count")
-                ));
+                )
+        );
     }
 
     @Override
@@ -56,15 +57,16 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
         return jdbcTemplate.query(
                 sql,
-                new Object[]{"%" + search + "%"},
-                (rs, rowNum) -> new PostDto(
-                        rs.getLong("id"),
-                        rs.getString("title"),
-                        rs.getString("text"),
-                        List.of((String[]) rs.getArray("tags").getArray()),
-                        rs.getLong("comment_count"),
-                        rs.getLong("likes_count")
-                ));
+                (rs, rowNum) -> PostDto.builder()
+                        .id(rs.getLong("id"))
+                        .title(rs.getString("title"))
+                        .text(rs.getString("text"))
+                        .tags(List.of((String[]) rs.getArray("tags").getArray()))
+                        .likesCount(rs.getLong("likes_count"))
+                        .commentCount(rs.getLong("comment_count"))
+                        .build(),
+                "%" + search + "%"
+        );
     }
 
     @Override
@@ -105,7 +107,7 @@ public class JdbcNativePostRepository implements PostRepository {
                     new String[]{"id"}
             );
             ps.setString(1, newCommentDto.getText());
-            ps.setLong(2,postId);
+            ps.setLong(2, postId);
 
             return ps;
         }, keyHolder);
@@ -160,14 +162,14 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
         return jdbcTemplate.queryForObject(
                 sql,
-                (rs, rowNum) -> new Post(
-                        rs.getLong("id"),
-                        rs.getString("title"),
-                        rs.getString("text"),
-                        List.of((String[]) rs.getArray("tags").getArray()),
-                        rs.getLong("comment_count"),
-                        rs.getLong("likes_count")
-                ),
+                (rs, rowNum) -> Post.builder()
+                        .id(rs.getLong("id"))
+                        .title(rs.getString("title"))
+                        .text(rs.getString("text"))
+                        .tags(List.of((String[]) rs.getArray("tags").getArray()))
+                        .likesCount(rs.getLong("likes_count"))
+                        .commentCount(rs.getLong("comment_count"))
+                        .build(),
                 postId
         );
     }
@@ -181,24 +183,28 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
         List<Comment> commentList = jdbcTemplate.query(
                 sql,
-                new Object[]{postId},
-                (rs, rowNum) -> new Comment(
-                        rs.getLong("id"),
-                        rs.getString("text"),
-                        rs.getLong("post_id")
-                ));
+                (rs, rowNum) -> Comment.builder()
+                        .id(rs.getLong("id"))
+                        .text(rs.getString("text"))
+                        .postId(rs.getLong("post_id"))
+                        .build()
+                ,
+                postId
+        );
         return commentList == null ? Collections.emptyList() : commentList;
     }
 
     @Override
-    public Long likesIncrease(Long postId, Long likesCountIncreased) {
-        jdbcTemplate.update("""
-                        update post set likes_count = ?
+    public Long likesIncrease(Long postId) {
+        return jdbcTemplate.queryForObject("""
+                        update post
+                        set likes_count = likes_count + 1
                         where id = ?
+                        returning likes_count
                         """,
-                likesCountIncreased,
-                postId);
-        return likesCountIncreased;
+                Long.class,
+                postId
+        );
     }
 
     @Override

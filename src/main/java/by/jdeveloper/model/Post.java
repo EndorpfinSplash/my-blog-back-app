@@ -1,13 +1,13 @@
 package by.jdeveloper.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.util.List;
 
 @Data
-@Getter
+@Builder
 @AllArgsConstructor
 public class Post {
     private Long id;
