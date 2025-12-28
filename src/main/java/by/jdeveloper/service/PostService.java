@@ -75,4 +75,7 @@ public class PostService {
         return postRepository.findCommentsByPostIdAndCommentId(postId, commentId);
     }
 
+    public void deleteByPostIdAndCommentId(Long postId, Long commentId) {
+        postRepository.deleteByPostIdAndCommentId(postId, commentId);
+    }
 }

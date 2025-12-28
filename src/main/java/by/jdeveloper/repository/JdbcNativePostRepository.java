@@ -227,4 +227,13 @@ public class JdbcNativePostRepository implements PostRepository {
         );
     }
 
+    @Override
+    public void deleteByPostIdAndCommentId(Long postId, Long commentId) {
+        jdbcTemplate.update(
+                "delete from comment where id = ? and post_id = ?",
+                commentId,
+                postId
+        );
+    }
+
 }

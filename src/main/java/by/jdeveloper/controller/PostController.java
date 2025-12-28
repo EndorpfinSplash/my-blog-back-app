@@ -49,6 +49,13 @@ public class PostController {
         service.deleteById(id);
     }
 
+
+    @DeleteMapping(value = "/{id}/comments/{commentId}")
+    public void delete(@PathVariable("id") Long postId,
+                       @PathVariable("commentId") Long commentId) {
+        service.deleteByPostIdAndCommentId(postId, commentId);
+    }
+
     @PutMapping("/{id}")
     public PostDto update(@PathVariable(name = "id") Long id, @RequestBody PostUpdateDto postUpdated) {
         return service.update(id, postUpdated);
@@ -67,7 +74,7 @@ public class PostController {
     @GetMapping("/{id}/comments/{commentId}")
     public Comment getComment(
             @PathVariable("id") Long postId,
-            @PathVariable("id") Long commentId) {
+            @PathVariable("commentId") Long commentId) {
         return service.getCommentsByPostIdAndCommentId(postId, commentId);
     }
 

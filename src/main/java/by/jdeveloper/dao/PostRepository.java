@@ -27,4 +27,6 @@ public interface PostRepository {
     Long likesIncrease(Long postId);
 
     Comment findCommentsByPostIdAndCommentId(Long postId, Long commentId);
+
+    void deleteByPostIdAndCommentId(Long postId, Long commentId);
 }
