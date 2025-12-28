@@ -1,5 +1,6 @@
 package by.jdeveloper.controller;
 
+import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
 import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.dto.PostUpdateDto;
@@ -63,4 +64,17 @@ public class PostController {
         return service.getCommentsByPostId(postId);
     }
 
+    @GetMapping("/{id}/comments/{commentId}")
+    public Comment getComment(
+            @PathVariable("id") Long postId,
+            @PathVariable("id") Long commentId) {
+        return service.getCommentsByPostIdAndCommentId(postId, commentId);
+    }
+
+    @PostMapping("/{id}/comments")
+    public Comment save(
+            @PathVariable("id") Long postId,
+            @RequestBody NewCommentDto newCommentDto) {
+        return service.save(postId, newCommentDto);
+    }
 }

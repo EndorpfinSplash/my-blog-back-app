@@ -1,6 +1,7 @@
 package by.jdeveloper.service;
 
 import by.jdeveloper.dao.PostRepository;
+import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
 import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.dto.PostUpdateDto;
@@ -27,6 +28,10 @@ public class PostService {
     public PostDto save(NewPostDto newPostDto) {
         Post post = postMapper.toEntity(newPostDto);
         return postMapper.toDto(postRepository.save(post));
+    }
+
+    public Comment save(Long postId, NewCommentDto newCommentDto) {
+        return postRepository.save(postId, newCommentDto);
     }
 
     public void deleteById(Long id) {
@@ -60,11 +65,16 @@ public class PostService {
         return postRepository.likesIncrease(postId, likesCountIncreased);
     }
 
+    public PostDto findById(Long id) {
+        return postMapper.toDto(postRepository.findById(id));
+    }
+
     public List<Comment> getCommentsByPostId(Long postId) {
         return postRepository.findAllCommentsByPostId(postId);
     }
 
-    public PostDto findById(Long id) {
-        return postMapper.toDto(postRepository.findById(id));
+    public Comment getCommentsByPostIdAndCommentId(Long postId, Long commentId) {
+        return postRepository.findCommentsByPostIdAndCommentId(postId, commentId);
     }
+
 }

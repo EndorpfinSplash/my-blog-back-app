@@ -43,4 +43,15 @@ public class FilesService {
         }
     }
 
+    public byte[] download(Long id) {
+        try {
+            Path filePath = Paths.get(UPLOAD_DIR).resolve(String.valueOf(id)).normalize();
+            byte[] content = Files.readAllBytes(filePath);
+
+            return content;
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
 }

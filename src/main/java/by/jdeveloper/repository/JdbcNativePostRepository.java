@@ -1,6 +1,7 @@
 package by.jdeveloper.repository;
 
 import by.jdeveloper.dao.PostRepository;
+import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -56,7 +58,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 sql,
                 new Object[]{"%" + search + "%"},
                 (rs, rowNum) -> new PostDto(
-                        rs.getString("id"),
+                        rs.getLong("id"),
                         rs.getString("title"),
                         rs.getString("text"),
                         List.of((String[]) rs.getArray("tags").getArray()),
@@ -93,6 +95,31 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public Comment save(Long postId, NewCommentDto newCommentDto) {
+        Comment comment = new Comment();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO comment(text, post_id) VALUES (?, ?)",
+                    new String[]{"id"}
+            );
+            ps.setString(1, newCommentDto.getText());
+            ps.setLong(2,postId);
+
+            return ps;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        if (key != null) {
+            comment.setId(key.longValue());
+            comment.setText(newCommentDto.getText());
+            comment.setPostId(postId);
+        }
+        return comment;
+    }
+
+    @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("delete from post where id = ?", id);
     }
@@ -122,7 +149,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public Post findById(Long id) {
+    public Post findById(Long postId) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,
                        count(c.id) as comment_count
@@ -131,9 +158,8 @@ public class JdbcNativePostRepository implements PostRepository {
                 where p.id = ?
                 group by p.id, p.title, p.text, p.likes_count, p.tags
                 """;
-        Post post = jdbcTemplate.queryForObject(
+        return jdbcTemplate.queryForObject(
                 sql,
-                new Object[]{id},
                 (rs, rowNum) -> new Post(
                         rs.getLong("id"),
                         rs.getString("title"),
@@ -141,8 +167,9 @@ public class JdbcNativePostRepository implements PostRepository {
                         List.of((String[]) rs.getArray("tags").getArray()),
                         rs.getLong("comment_count"),
                         rs.getLong("likes_count")
-                ));
-        return post;
+                ),
+                postId
+        );
     }
 
     @Override
@@ -152,7 +179,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 from comment c
                 where c.post_id = ?
                 """;
-        return jdbcTemplate.query(
+        List<Comment> commentList = jdbcTemplate.query(
                 sql,
                 new Object[]{postId},
                 (rs, rowNum) -> new Comment(
@@ -160,6 +187,7 @@ public class JdbcNativePostRepository implements PostRepository {
                         rs.getString("text"),
                         rs.getLong("post_id")
                 ));
+        return commentList == null ? Collections.emptyList() : commentList;
     }
 
     @Override
@@ -171,6 +199,26 @@ public class JdbcNativePostRepository implements PostRepository {
                 likesCountIncreased,
                 postId);
         return likesCountIncreased;
+    }
+
+    @Override
+    public Comment findCommentsByPostIdAndCommentId(Long postId, Long commentId) {
+        String sql = """
+                select c.id, c.text, c.post_id
+                from comment c
+                where c.post_id = ? and c.id = ?
+                """;
+
+        return jdbcTemplate.queryForObject(
+                sql,
+                (rs, rowNum) -> new Comment(
+                        rs.getLong("id"),
+                        rs.getString("text"),
+                        rs.getLong("post_id")
+                ),
+                postId,
+                commentId
+        );
     }
 
 }
