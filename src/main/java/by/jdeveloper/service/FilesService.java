@@ -1,5 +1,7 @@
 package by.jdeveloper.service;
 
+import by.jdeveloper.dao.PostRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -11,9 +13,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
+@AllArgsConstructor
 public class FilesService {
 
+    private final PostRepository postRepository;
+
     public static final String UPLOAD_DIR = "uploads/";
+
+    public void uploadImage(Long postId, MultipartFile file) throws IOException {
+        String originalFilename = file.getOriginalFilename();
+        postRepository.saveByteArray(postId, originalFilename, file.getBytes());
+    }
+
+    public byte[] downloadFile(Long postId) {
+        return postRepository.getFileByPostId(postId);
+    }
 
     public String upload(MultipartFile file) {
         try {

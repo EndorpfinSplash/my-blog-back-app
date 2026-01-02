@@ -122,8 +122,9 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        jdbcTemplate.update("delete from post where id = ?", id);
+    public void deleteById(Long postId) {
+        jdbcTemplate.update("delete from comment where post_id = ?", postId);
+        jdbcTemplate.update("delete from post where id = ?", postId);
     }
 
     @Override
@@ -217,11 +218,11 @@ public class JdbcNativePostRepository implements PostRepository {
 
         return jdbcTemplate.queryForObject(
                 sql,
-                (rs, rowNum) -> new Comment(
-                        rs.getLong("id"),
-                        rs.getString("text"),
-                        rs.getLong("post_id")
-                ),
+                (rs, rowNum) -> Comment.builder()
+                        .id(rs.getLong("id"))
+                        .text(rs.getString("text"))
+                        .postId(rs.getLong("post_id"))
+                        .build(),
                 postId,
                 commentId
         );
@@ -233,6 +234,22 @@ public class JdbcNativePostRepository implements PostRepository {
                 "delete from comment where id = ? and post_id = ?",
                 commentId,
                 postId
+        );
+    }
+
+    @Override
+    public void saveByteArray(Long postId, String fileName, byte[] data) {
+        jdbcTemplate.update(
+                "insert into image (post_id, file_name, data) values (?, ?, ?)",
+                postId, fileName, data);
+    }
+
+    @Override
+    public byte[] getFileByPostId(Long postId) {
+        String sql = "SELECT data FROM image WHERE post_id = ?";
+
+        return jdbcTemplate.queryForObject(sql, new Object[]{postId}, (rs, rowNum) ->
+                rs.getBytes("data")
         );
     }
 

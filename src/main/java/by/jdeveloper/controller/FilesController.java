@@ -9,10 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -37,11 +40,24 @@ public class FilesController {
     }
 
     @GetMapping("/{id}/image")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable(name = "id") Long id) {
-//        byte[] file = filesService.download(id);
+    public ResponseEntity<byte[]> downloadFile(@PathVariable(name = "id") Long postId) {
+        byte[] file = filesService.downloadFile(postId);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(new byte[]{});
+                .body(file);
+    }
+
+    @PostMapping("/{id}/image")
+    public void uploadImageFile(@PathVariable(name = "id") Long postId,
+                                @RequestParam("file") MultipartFile file) throws IOException {
+        filesService.uploadImage(postId, file);
+    }
+
+    @PutMapping("/{id}/image")
+    public ResponseEntity uploadImage(@PathVariable(name = "id") Long postId,
+                                      @RequestParam("file") MultipartFile file) throws IOException {
+        filesService.uploadImage(postId, file);
+        return ResponseEntity.ok().build();
     }
 }

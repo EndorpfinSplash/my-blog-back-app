@@ -29,4 +29,8 @@ public interface PostRepository {
     Comment findCommentsByPostIdAndCommentId(Long postId, Long commentId);
 
     void deleteByPostIdAndCommentId(Long postId, Long commentId);
+
+    void saveByteArray(Long postId, String name, byte[] data);
+
+    byte[] getFileByPostId(Long postId);
 }
