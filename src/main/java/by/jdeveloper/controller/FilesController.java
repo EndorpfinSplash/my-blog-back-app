@@ -1,6 +1,7 @@
 package by.jdeveloper.controller;
 
 import by.jdeveloper.service.FilesService;
+import jakarta.servlet.annotation.MultipartConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,26 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
+@MultipartConfig
 @RequestMapping("/api/posts")
 @AllArgsConstructor
 public class FilesController {
 
     private final FilesService filesService;
-
-    // POST эндпоинт для загрузки файла
-    @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file) {
-        return filesService.upload(file);
-    }
-
-    // GET эндпоинт для скачивания файла
-    @GetMapping("/download/{filename}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable(name = "filename") String filename) {
-        Resource file = filesService.download(filename);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(file);
-    }
 
     @GetMapping("/{id}/image")
     public ResponseEntity<byte[]> downloadFile(@PathVariable(name = "id") Long postId) {
@@ -48,16 +35,10 @@ public class FilesController {
                 .body(file);
     }
 
-    @PostMapping("/{id}/image")
-    public void uploadImageFile(@PathVariable(name = "id") Long postId,
-                                @RequestParam("file") MultipartFile file) throws IOException {
-        filesService.uploadImage(postId, file);
-    }
-
     @PutMapping("/{id}/image")
     public ResponseEntity uploadImage(@PathVariable(name = "id") Long postId,
-                                      @RequestParam("file") MultipartFile file) throws IOException {
-        filesService.uploadImage(postId, file);
+                                      @RequestParam("image") MultipartFile image) throws IOException {
+        filesService.uploadImage(postId, image);
         return ResponseEntity.ok().build();
     }
 }

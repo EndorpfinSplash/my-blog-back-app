@@ -6,6 +6,7 @@ import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -247,10 +248,13 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public byte[] getFileByPostId(Long postId) {
         String sql = "SELECT data FROM image WHERE post_id = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, new Object[]{postId},
+                    (rs, rowNum) -> rs.getBytes("data"));
+        } catch (EmptyResultDataAccessException e) {
+            return new byte[0];
+        }
 
-        return jdbcTemplate.queryForObject(sql, new Object[]{postId}, (rs, rowNum) ->
-                rs.getBytes("data")
-        );
     }
 
 }

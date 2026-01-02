@@ -2,15 +2,10 @@ package by.jdeveloper.service;
 
 import by.jdeveloper.dao.PostRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Service
 @AllArgsConstructor
@@ -18,54 +13,13 @@ public class FilesService {
 
     private final PostRepository postRepository;
 
-    public static final String UPLOAD_DIR = "uploads/";
-
-    public void uploadImage(Long postId, MultipartFile file) throws IOException {
-        String originalFilename = file.getOriginalFilename();
-        postRepository.saveByteArray(postId, originalFilename, file.getBytes());
+    public void uploadImage(Long postId, MultipartFile image) throws IOException {
+        String imageName = image.getOriginalFilename();
+        postRepository.saveByteArray(postId, imageName, image.getBytes());
     }
 
     public byte[] downloadFile(Long postId) {
         return postRepository.getFileByPostId(postId);
-    }
-
-    public String upload(MultipartFile file) {
-        try {
-            Path uploadDir = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
-
-            // Сохраняем файл
-            Path filePath = uploadDir.resolve(file.getOriginalFilename());
-            file.transferTo(filePath);
-
-            return file.getOriginalFilename();
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    public Resource download(String filename) {
-        try {
-            Path filePath = Paths.get(UPLOAD_DIR).resolve(filename).normalize();
-            byte[] content = Files.readAllBytes(filePath);
-
-            return new ByteArrayResource(content);
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    public byte[] download(Long id) {
-        try {
-            Path filePath = Paths.get(UPLOAD_DIR).resolve(String.valueOf(id)).normalize();
-            byte[] content = Files.readAllBytes(filePath);
-
-            return content;
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
     }
 
 }
