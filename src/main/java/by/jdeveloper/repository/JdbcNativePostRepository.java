@@ -7,6 +7,7 @@ import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -22,29 +23,6 @@ import java.util.List;
 public class JdbcNativePostRepository implements PostRepository {
 
     private final JdbcTemplate jdbcTemplate;
-
-    @Override
-    public List<Post> findAll() {
-
-        String sql = """
-                select p.id, p.title, p.text, p.likes_count, p.tags,
-                       count(c.id) as comment_count
-                from post p
-                left join comment c on p.id = c.post_id
-                group by p.id, p.title, p.text, p.likes_count, p.tags
-                """;
-        return jdbcTemplate.query(
-                sql,
-                (rs, rowNum) -> new Post(
-                        rs.getLong("id"),
-                        rs.getString("title"),
-                        rs.getString("text"),
-                        List.of((String[]) rs.getArray("tags").getArray()),
-                        rs.getLong("likes_count"),
-                        rs.getLong("comment_count")
-                )
-        );
-    }
 
     @Override
     public List<PostDto> findAllByTitleContains(String search) {
@@ -125,6 +103,7 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public void deleteById(Long postId) {
         jdbcTemplate.update("delete from comment where post_id = ?", postId);
+        jdbcTemplate.update("delete from image where post_id = ?", postId);
         jdbcTemplate.update("delete from post where id = ?", postId);
     }
 
@@ -183,30 +162,22 @@ public class JdbcNativePostRepository implements PostRepository {
                 from comment c
                 where c.post_id = ?
                 """;
-        List<Comment> commentList = jdbcTemplate.query(
-                sql,
-                (rs, rowNum) -> Comment.builder()
-                        .id(rs.getLong("id"))
-                        .text(rs.getString("text"))
-                        .postId(rs.getLong("post_id"))
-                        .build()
-                ,
-                postId
-        );
-        return commentList == null ? Collections.emptyList() : commentList;
+        try {
+            return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Comment.class), postId);
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override
     public Long likesIncrease(Long postId) {
-        return jdbcTemplate.queryForObject("""
-                        update post
-                        set likes_count = likes_count + 1
-                        where id = ?
-                        returning likes_count
-                        """,
-                Long.class,
-                postId
-        );
+        String sql = """
+                update post
+                set likes_count = likes_count + 1
+                where id = ?
+                returning likes_count
+                """;
+        return jdbcTemplate.queryForObject(sql, Long.class, postId);
     }
 
     @Override
@@ -239,22 +210,28 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public void saveByteArray(Long postId, String fileName, byte[] data) {
+    public void saveFile(Long postId, String fileName, byte[] data) {
         jdbcTemplate.update(
                 "insert into image (post_id, file_name, data) values (?, ?, ?)",
                 postId, fileName, data);
     }
 
+    public void updateFileByPostId(Long postId, String fileName, byte[] data) {
+        jdbcTemplate.update(
+                "update image set file_name= ?, data = ? where post_id= ?",
+                fileName, data, postId);
+    }
+
     @Override
     public byte[] getFileByPostId(Long postId) {
         String sql = "SELECT data FROM image WHERE post_id = ?";
-        try {
-            return jdbcTemplate.queryForObject(sql, new Object[]{postId},
-                    (rs, rowNum) -> rs.getBytes("data"));
-        } catch (EmptyResultDataAccessException e) {
-            return new byte[0];
-        }
+        return jdbcTemplate.queryForObject(sql, byte[].class, postId);
+    }
 
+    @Override
+    public Long countFilesByPostId(Long postId) {
+        String sql = "SELECT count(*) FROM image WHERE post_id = ?";
+        return jdbcTemplate.queryForObject(sql, Long.class, postId);
     }
 
 }

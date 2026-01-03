@@ -15,10 +15,16 @@ public class FilesService {
 
     public void uploadImage(Long postId, MultipartFile image) throws IOException {
         String imageName = image.getOriginalFilename();
-        postRepository.saveByteArray(postId, imageName, image.getBytes());
+        if (postRepository.countFilesByPostId(postId).equals(0L)) {
+            postRepository.saveFile(postId, imageName, image.getBytes());
+        }
+        postRepository.updateFileByPostId(postId, imageName, image.getBytes());
     }
 
     public byte[] downloadFile(Long postId) {
+        if (postRepository.countFilesByPostId(postId).equals(0L)) {
+            return new byte[]{};
+        }
         return postRepository.getFileByPostId(postId);
     }
 

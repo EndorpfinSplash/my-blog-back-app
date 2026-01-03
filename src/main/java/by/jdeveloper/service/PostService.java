@@ -12,6 +12,7 @@ import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,10 +21,6 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostMapper postMapper;
-
-    public List<Post> findAll() {
-        return postRepository.findAll();
-    }
 
     public PostDto save(NewPostDto newPostDto) {
         Post post = postMapper.toEntity(newPostDto);
@@ -49,10 +46,13 @@ public class PostService {
     public PostsResponse findPosts(String search,
                                    int pageNumber,
                                    int pageSize) {
-        List<PostDto> posts = postRepository.findAllByTitleContains(search);
-        int lastPage = (int) Math.ceil((double) posts.size() / pageSize);
+        ArrayList<PostDto> postsAll = new ArrayList<>(postRepository.findAllByTitleContains(search));
+        int lastPage = (int) Math.ceil((double) postsAll.size() / pageSize);
+        int fromIndex = (pageNumber - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, postsAll.size() - 1);
+        List<PostDto> postsSlice = postsAll.subList(fromIndex, toIndex);
         return PostsResponse.builder()
-                .posts(posts)
+                .posts(postsSlice)
                 .hasNext(pageNumber < lastPage)
                 .hasPrev(pageNumber > 1)
                 .lastPage(lastPage)
@@ -67,12 +67,25 @@ public class PostService {
         return postMapper.toDto(postRepository.findById(id));
     }
 
-    public List<Comment> getCommentsByPostId(Long postId) {
-        return postRepository.findAllCommentsByPostId(postId);
+    public List<Comment> getCommentsByPostId(String postId) {
+        long postIdParsed;
+        try {
+            postIdParsed = Long.parseLong(postId);
+        } catch (NumberFormatException e) {
+            return new ArrayList<>() {
+            };
+        }
+        return postRepository.findAllCommentsByPostId(postIdParsed);
     }
 
-    public Comment getCommentsByPostIdAndCommentId(Long postId, Long commentId) {
-        return postRepository.findCommentsByPostIdAndCommentId(postId, commentId);
+    public Comment getCommentsByPostIdAndCommentId(String postId, Long commentId) {
+        long postIdParsed;
+        try {
+            postIdParsed = Long.parseLong(postId);
+        } catch (NumberFormatException e) {
+            return new Comment();
+        }
+        return postRepository.findCommentsByPostIdAndCommentId(postIdParsed, commentId);
     }
 
     public void deleteByPostIdAndCommentId(Long postId, Long commentId) {

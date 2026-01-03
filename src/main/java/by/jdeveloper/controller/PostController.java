@@ -67,13 +67,13 @@ public class PostController {
     }
 
     @GetMapping("/{id}/comments")
-    public List<Comment> getComments(@PathVariable("id") Long postId) {
+    public List<Comment> getComments(@PathVariable("id") String postId) {
         return service.getCommentsByPostId(postId);
     }
 
     @GetMapping("/{id}/comments/{commentId}")
     public Comment getComment(
-            @PathVariable("id") Long postId,
+            @PathVariable("id") String postId,
             @PathVariable("commentId") Long commentId) {
         return service.getCommentsByPostIdAndCommentId(postId, commentId);
     }
