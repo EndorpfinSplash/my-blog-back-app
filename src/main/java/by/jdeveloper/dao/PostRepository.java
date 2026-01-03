@@ -5,11 +5,14 @@ import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface PostRepository {
 
-    List<PostDto> findAllByTitleContains(String search);
+    Collection<PostDto> findAllByTitleContains(String search);
+
+    Collection<PostDto> findAllByTagContains(String search);
 
     Post save(Post post);
 

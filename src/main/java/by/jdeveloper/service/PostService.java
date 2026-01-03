@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -46,11 +47,28 @@ public class PostService {
     public PostsResponse findPosts(String search,
                                    int pageNumber,
                                    int pageSize) {
-        ArrayList<PostDto> postsAll = new ArrayList<>(postRepository.findAllByTitleContains(search));
-        int lastPage = (int) Math.ceil((double) postsAll.size() / pageSize);
+        String[] searchArray = search.split(" +");
+        LinkedList<String> titleSearchList = new LinkedList<>();
+        LinkedList<String> tagSearchList = new LinkedList<>();
+        for (String searchWord : searchArray) {
+            if (searchWord.startsWith("#")) {
+                tagSearchList.add(searchWord);
+                continue;
+            }
+            titleSearchList.add(searchWord);
+        }
+
+        String searchByTitleLine = String.join(" ", titleSearchList);
+        ArrayList<PostDto> searchedPosts = new ArrayList<>(postRepository.findAllByTitleContains(searchByTitleLine));
+
+        tagSearchList.forEach(tagSearchWord -> searchedPosts.addAll(postRepository.findAllByTagContains(search)));
+        if (searchedPosts.isEmpty()) {
+            return new PostsResponse();
+        }
+        int lastPage = (int) Math.ceil((double) searchedPosts.size() / pageSize);
         int fromIndex = (pageNumber - 1) * pageSize;
-        int toIndex = Math.min(fromIndex + pageSize, postsAll.size() - 1);
-        List<PostDto> postsSlice = postsAll.subList(fromIndex, toIndex);
+        int toIndex = Math.min(fromIndex + pageSize, searchedPosts.size() - 1);
+        List<PostDto> postsSlice = searchedPosts.subList(fromIndex, toIndex);
         return PostsResponse.builder()
                 .posts(postsSlice)
                 .hasNext(pageNumber < lastPage)

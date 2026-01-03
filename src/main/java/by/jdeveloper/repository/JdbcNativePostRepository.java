@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,10 +29,10 @@ public class JdbcNativePostRepository implements PostRepository {
     public List<PostDto> findAllByTitleContains(String search) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,
-                       count(c.id) as comment_count
+                       count(c.id) as comments_count
                 from post p
                 left join comment c on p.id = c.post_id
-                where title ilike ?
+                where p.title ilike ?
                 group by p.id, p.title, p.text, p.likes_count, p.tags
                 """;
         return jdbcTemplate.query(
@@ -42,9 +43,33 @@ public class JdbcNativePostRepository implements PostRepository {
                         .text(rs.getString("text"))
                         .tags(List.of((String[]) rs.getArray("tags").getArray()))
                         .likesCount(rs.getLong("likes_count"))
-                        .commentCount(rs.getLong("comment_count"))
+                        .commentsCount(rs.getLong("comments_count"))
                         .build(),
                 "%" + search + "%"
+        );
+    }
+
+    @Override
+    public Collection<PostDto> findAllByTagContains(String search) {
+        String sql = """
+                select p.id, p.title, p.text, p.likes_count, p.tags,
+                       count(c.id) as comments_count
+                from post p
+                left join comment c on p.id = c.post_id
+                where ? = ANY(p.tags)
+                group by p.id, p.title, p.text, p.likes_count, p.tags
+                """;
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> PostDto.builder()
+                        .id(rs.getLong("id"))
+                        .title(rs.getString("title"))
+                        .text(rs.getString("text"))
+                        .tags(List.of((String[]) rs.getArray("tags").getArray()))
+                        .likesCount(rs.getLong("likes_count"))
+                        .commentsCount(rs.getLong("comments_count"))
+                        .build(),
+                 search
         );
     }
 

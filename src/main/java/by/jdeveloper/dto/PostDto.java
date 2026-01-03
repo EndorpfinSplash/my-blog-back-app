@@ -17,5 +17,5 @@ public class PostDto {
     private String text;
     private List<String> tags;
     private Long likesCount;
-    private Long commentCount;
+    private Long commentsCount;
 }

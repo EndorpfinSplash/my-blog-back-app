@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -12,7 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class PostsResponse {
-    private List<PostDto> posts;
+    @Builder.Default
+    private List<PostDto> posts = new ArrayList<>();
     private boolean hasPrev;
     private boolean hasNext;
     private int lastPage;
