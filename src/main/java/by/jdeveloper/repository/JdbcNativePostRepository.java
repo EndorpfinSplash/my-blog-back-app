@@ -50,7 +50,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public Collection<PostDto> findAllByTagContains(String search) {
+    public Collection<PostDto> findAllByTagContains(String tag) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,
                        count(c.id) as comments_count
@@ -69,7 +69,7 @@ public class JdbcNativePostRepository implements PostRepository {
                         .likesCount(rs.getLong("likes_count"))
                         .commentsCount(rs.getLong("comments_count"))
                         .build(),
-                 search
+                tag
         );
     }
 

@@ -12,7 +12,7 @@ public interface PostRepository {
 
     Collection<PostDto> findAllByTitleContains(String search);
 
-    Collection<PostDto> findAllByTagContains(String search);
+    Collection<PostDto> findAllByTagContains(String tag);
 
     Post save(Post post);
 

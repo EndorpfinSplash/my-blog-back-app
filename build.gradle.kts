@@ -48,6 +48,8 @@ dependencies {
 
     implementation("org.postgresql:postgresql:42.7.3")
 
+    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    testImplementation("org.springframework:spring-test:6.2.13")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

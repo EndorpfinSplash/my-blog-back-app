@@ -51,23 +51,30 @@ public class PostService {
         LinkedList<String> titleSearchList = new LinkedList<>();
         LinkedList<String> tagSearchList = new LinkedList<>();
         for (String searchWord : searchArray) {
-            if (searchWord.startsWith("#")) {
-                tagSearchList.add(searchWord);
+            if (searchWord.startsWith("#") && searchWord.length() > 1) {
+                tagSearchList.add(searchWord.substring(1));
                 continue;
             }
             titleSearchList.add(searchWord);
         }
 
-        String searchByTitleLine = String.join(" ", titleSearchList);
-        ArrayList<PostDto> searchedPosts = new ArrayList<>(postRepository.findAllByTitleContains(searchByTitleLine));
+        ArrayList<PostDto> searchedPosts = new ArrayList<>();
+        if (!tagSearchList.isEmpty()) {
+            tagSearchList.forEach(tag -> searchedPosts.addAll(postRepository.findAllByTagContains(tag)));
+        }
 
-        tagSearchList.forEach(tagSearchWord -> searchedPosts.addAll(postRepository.findAllByTagContains(search)));
+        if (tagSearchList.isEmpty() && !titleSearchList.isEmpty()) {
+            String searchByTitleLine = String.join(" ", titleSearchList);
+            searchedPosts.addAll(postRepository.findAllByTitleContains(searchByTitleLine));
+        }
+
         if (searchedPosts.isEmpty()) {
             return new PostsResponse();
         }
+
         int lastPage = (int) Math.ceil((double) searchedPosts.size() / pageSize);
         int fromIndex = (pageNumber - 1) * pageSize;
-        int toIndex = Math.min(fromIndex + pageSize, searchedPosts.size() - 1);
+        int toIndex = Math.min(fromIndex + pageSize, searchedPosts.size());
         List<PostDto> postsSlice = searchedPosts.subList(fromIndex, toIndex);
         return PostsResponse.builder()
                 .posts(postsSlice)
