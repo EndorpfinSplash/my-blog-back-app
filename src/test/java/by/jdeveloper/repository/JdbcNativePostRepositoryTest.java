@@ -24,7 +24,17 @@ class JdbcNativePostRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.execute("DELETE FROM post");
+      //  jdbcTemplate.execute("DELETE FROM post");
+
+        jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
+                ps -> {
+                    ps.setString(1, "Test title");
+                    ps.setString(2, "test text");
+                    java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"test_tag"});
+                    ps.setArray(3, tagsArray);
+                    ps.setInt(4, 0);
+                }
+        );
     }
 
     @Test

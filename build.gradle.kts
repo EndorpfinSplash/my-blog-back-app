@@ -47,6 +47,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
 
     implementation("org.postgresql:postgresql:42.7.3")
+    testImplementation("com.h2database:h2:2.2.220")
 
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
     testImplementation("org.springframework:spring-test:6.2.13")
