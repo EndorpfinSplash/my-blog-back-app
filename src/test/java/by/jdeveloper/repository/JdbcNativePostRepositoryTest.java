@@ -2,12 +2,18 @@ package by.jdeveloper.repository;
 
 import by.jdeveloper.configuration.DataSourceConfiguration;
 import by.jdeveloper.dao.PostRepository;
+import by.jdeveloper.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringJUnitConfig(classes = {
         DataSourceConfiguration.class,
@@ -24,7 +30,7 @@ class JdbcNativePostRepositoryTest {
 
     @BeforeEach
     void setUp() {
-      //  jdbcTemplate.execute("DELETE FROM post");
+        jdbcTemplate.execute("DELETE FROM post");
 
         jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
                 ps -> {
@@ -35,6 +41,28 @@ class JdbcNativePostRepositoryTest {
                     ps.setInt(4, 0);
                 }
         );
+
+        jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
+                ps -> {
+                    ps.setString(1, "Test title 2");
+                    ps.setString(2, "test second");
+                    java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"test_second"});
+                    ps.setArray(3, tagsArray);
+                    ps.setInt(4, 0);
+                }
+        );
+
+        jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
+                ps -> {
+                    ps.setString(1, "Test three");
+                    ps.setString(2, "test 2");
+                    java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"three"});
+                    ps.setArray(3, tagsArray);
+                    ps.setInt(4, 0);
+                }
+        );
+
+
     }
 
     @Test
@@ -46,7 +74,21 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void save() {
+    void save_shouldAddPostToDatabase() {
+        Post post = Post.builder()
+                .title("for save")
+                .text("some text")
+                .tags(List.of("saved_tag"))
+                .build();
+        postRepository.save(post);
+
+        Post saved = postRepository.findById(4L);
+
+        assertNotNull(saved);
+        assertEquals(4L, saved.getId());
+        assertEquals("for save", saved.getTitle());
+        assertEquals("some text", saved.getText());
+        assertEquals("saved_tag", saved.getTags().getFirst());
     }
 
     @Test

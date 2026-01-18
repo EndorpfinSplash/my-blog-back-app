@@ -14,6 +14,8 @@ public class Post {
     private String title;
     private String text;
     private List<String> tags;
+    @Builder.Default
     private Long likesCount = 0L;
+    @Builder.Default
     private Long commentCount = 0L;
 }

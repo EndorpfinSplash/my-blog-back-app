@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -168,14 +169,21 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
         return jdbcTemplate.queryForObject(
                 sql,
-                (rs, rowNum) -> Post.builder()
-                        .id(rs.getLong("id"))
-                        .title(rs.getString("title"))
-                        .text(rs.getString("text"))
-                        .tags(List.of((String[]) rs.getArray("tags").getArray()))
-                        .likesCount(rs.getLong("likes_count"))
-                        .commentCount(rs.getLong("comment_count"))
-                        .build(),
+                (rs, rowNum) -> {
+                    Object[] tagsArray = (Object[]) rs.getArray("tags").getArray();
+                    List<String> tags = Arrays.stream(tagsArray)
+                            .map(Object::toString)
+                            .toList();
+
+                    return Post.builder()
+                            .id(rs.getLong("id"))
+                            .title(rs.getString("title"))
+                            .text(rs.getString("text"))
+                            .tags(tags)
+                            .likesCount(rs.getLong("likes_count"))
+                            .commentCount(rs.getLong("comment_count"))
+                            .build();
+                },
                 postId
         );
     }

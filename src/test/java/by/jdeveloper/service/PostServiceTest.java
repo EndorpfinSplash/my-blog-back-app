@@ -12,9 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@ExtendWith(SpringExtension.class) // Подключаем Spring TestContext
-@ContextConfiguration(classes = {
+//@ExtendWith(SpringExtension.class) // Подключаем Spring TestContext
+@SpringJUnitConfig(classes = {
         DataSourceConfiguration.class,
         PostService.class,
         JdbcNativePostRepository.class,
