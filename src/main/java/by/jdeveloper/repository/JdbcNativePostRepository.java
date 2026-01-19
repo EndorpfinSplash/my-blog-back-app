@@ -51,6 +51,31 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public List<PostDto> getAll() {
+        String sql = """
+                select p.id, p.title, p.text, p.likes_count, p.tags
+                from post p
+                """;
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> {
+                    Object[] tagsArray = (Object[]) rs.getArray("tags").getArray();
+                    List<String> tags = Arrays.stream(tagsArray)
+                            .map(Object::toString)
+                            .toList();
+
+                    return PostDto.builder()
+                            .id(rs.getLong("id"))
+                            .title(rs.getString("title"))
+                            .text(rs.getString("text"))
+                            .tags(tags)
+                            .likesCount(rs.getLong("likes_count"))
+                            .build();
+
+                });
+    }
+
+    @Override
     public Collection<PostDto> findAllByTagContains(String tag) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,

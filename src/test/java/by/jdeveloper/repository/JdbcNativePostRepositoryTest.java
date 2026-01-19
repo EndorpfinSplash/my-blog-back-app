@@ -2,6 +2,7 @@ package by.jdeveloper.repository;
 
 import by.jdeveloper.configuration.DataSourceConfiguration;
 import by.jdeveloper.dao.PostRepository;
+import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringJUnitConfig(classes = {
         DataSourceConfiguration.class,
@@ -54,9 +56,9 @@ class JdbcNativePostRepositoryTest {
 
         jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
                 ps -> {
-                    ps.setString(1, "Test three");
-                    ps.setString(2, "test 2");
-                    java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"three"});
+                    ps.setString(1, "Title");
+                    ps.setString(2, "simple text");
+                    java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"simple_tag", "second_tag"});
                     ps.setArray(3, tagsArray);
                     ps.setInt(4, 0);
                 }
@@ -97,6 +99,11 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void deleteById() {
+        postRepository.deleteById(3L);
+
+        List<PostDto> allPosts = postRepository.getAll();
+        assertEquals(2, allPosts.size());
+        assertTrue(allPosts.stream().noneMatch(u -> u.getId().equals(3L)));
     }
 
     @Test
@@ -105,6 +112,12 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void findById() {
+        Post post = postRepository.findById(3L);
+
+        assertEquals("Title", post.getTitle());
+        assertEquals("simple text", post.getText());
+        assertEquals(0, post.getLikesCount());
+        assertTrue(List.of("simple_tag", "second_tag").containsAll(post.getTags()));
     }
 
     @Test

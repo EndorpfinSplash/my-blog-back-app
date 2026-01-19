@@ -12,6 +12,8 @@ public interface PostRepository {
 
     Collection<PostDto> findAllByTitleContains(String search);
 
+    List<PostDto> getAll();
+
     Collection<PostDto> findAllByTagContains(String tag);
 
     Post save(Post post);
