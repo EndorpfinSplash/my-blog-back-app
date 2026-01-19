@@ -11,11 +11,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig(classes = {
         DataSourceConfiguration.class,
@@ -38,7 +37,7 @@ class JdbcNativePostRepositoryTest {
                 ps -> {
                     ps.setString(1, "Test title");
                     ps.setString(2, "test text");
-                    java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"test_tag"});
+                    java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"simple_tag"});
                     ps.setArray(3, tagsArray);
                     ps.setInt(4, 0);
                 }
@@ -46,7 +45,7 @@ class JdbcNativePostRepositoryTest {
 
         jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
                 ps -> {
-                    ps.setString(1, "Test title 2");
+                    ps.setString(1, "TEST title 2");
                     ps.setString(2, "test second");
                     java.sql.Array tagsArray = ps.getConnection().createArrayOf("VARCHAR", new String[]{"test_second"});
                     ps.setArray(3, tagsArray);
@@ -68,12 +67,35 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void findAllByTitleContains() {
+    void findAllByExistedTitle_shouldReturnPosts() {
+        Collection<PostDto> posts = postRepository.findAllByTitleContains("test");
+
+        assertEquals(2, posts.size());
+        assertTrue(List.of(1L, 2L).containsAll(posts.stream().map(PostDto::getId).toList()));
     }
 
     @Test
-    void findAllByTagContains() {
+    void findAllByNonExistedTitle_shouldReturnEmptyList() {
+        Collection<PostDto> posts = postRepository.findAllByTitleContains("absent test");
+
+        assertEquals(0, posts.size());
     }
+
+    @Test
+    void findAllByExistedTag_shouldReturnPosts() {
+        Collection<PostDto> posts = postRepository.findAllByTagContains("simple_tag");
+
+        assertEquals(2, posts.size());
+        assertTrue(posts.stream().map(PostDto::getId).toList().containsAll(List.of(1L, 3L)));
+    }
+
+    @Test
+    void findAllByNonExistedTag_shouldReturnEmptyList() {
+        Collection<PostDto> posts = postRepository.findAllByTagContains("tag");
+
+        assertEquals(0, posts.size());
+    }
+
 
     @Test
     void save_shouldAddPostToDatabase() {
@@ -117,7 +139,8 @@ class JdbcNativePostRepositoryTest {
         assertEquals("Title", post.getTitle());
         assertEquals("simple text", post.getText());
         assertEquals(0, post.getLikesCount());
-        assertTrue(List.of("simple_tag", "second_tag").containsAll(post.getTags()));
+        assertTrue(post.getTags().containsAll(List.of("simple_tag", "second_tag")));
+        assertEquals(2, post.getTags().size());
     }
 
     @Test

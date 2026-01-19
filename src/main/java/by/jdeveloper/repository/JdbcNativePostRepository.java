@@ -6,6 +6,7 @@ import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,14 +41,16 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
         return jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> PostDto.builder()
-                        .id(rs.getLong("id"))
-                        .title(rs.getString("title"))
-                        .text(rs.getString("text"))
-                        .tags(List.of((String[]) rs.getArray("tags").getArray()))
-                        .likesCount(rs.getLong("likes_count"))
-                        .commentsCount(rs.getLong("comments_count"))
-                        .build(),
+                (rs, rowNum) -> {
+                    List<String> tags = getTags(rs);
+                    return PostDto.builder()
+                            .id(rs.getLong("id"))
+                            .title(rs.getString("title"))
+                            .text(rs.getString("text"))
+                            .tags(tags)
+                            .likesCount(rs.getLong("likes_count"))
+                            .build();
+                },
                 "%" + search + "%"
         );
     }
@@ -59,11 +64,7 @@ public class JdbcNativePostRepository implements PostRepository {
         return jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> {
-                    Object[] tagsArray = (Object[]) rs.getArray("tags").getArray();
-                    List<String> tags = Arrays.stream(tagsArray)
-                            .map(Object::toString)
-                            .toList();
-
+                    List<String> tags = getTags(rs);
                     return PostDto.builder()
                             .id(rs.getLong("id"))
                             .title(rs.getString("title"))
@@ -71,8 +72,15 @@ public class JdbcNativePostRepository implements PostRepository {
                             .tags(tags)
                             .likesCount(rs.getLong("likes_count"))
                             .build();
-
                 });
+    }
+
+    @NotNull
+    private List<String> getTags(ResultSet rs) throws SQLException {
+        Object[] tagsArray = (Object[]) rs.getArray("tags").getArray();
+        return Arrays.stream(tagsArray)
+                .map(Object::toString)
+                .toList();
     }
 
     @Override
@@ -87,14 +95,16 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
         return jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> PostDto.builder()
-                        .id(rs.getLong("id"))
-                        .title(rs.getString("title"))
-                        .text(rs.getString("text"))
-                        .tags(List.of((String[]) rs.getArray("tags").getArray()))
-                        .likesCount(rs.getLong("likes_count"))
-                        .commentsCount(rs.getLong("comments_count"))
-                        .build(),
+                (rs, rowNum) -> {
+                    List<String> tags = getTags(rs);
+                    return PostDto.builder()
+                            .id(rs.getLong("id"))
+                            .title(rs.getString("title"))
+                            .text(rs.getString("text"))
+                            .tags(tags)
+                            .likesCount(rs.getLong("likes_count"))
+                            .build();
+                },
                 tag
         );
     }
@@ -195,10 +205,7 @@ public class JdbcNativePostRepository implements PostRepository {
         return jdbcTemplate.queryForObject(
                 sql,
                 (rs, rowNum) -> {
-                    Object[] tagsArray = (Object[]) rs.getArray("tags").getArray();
-                    List<String> tags = Arrays.stream(tagsArray)
-                            .map(Object::toString)
-                            .toList();
+                    List<String> tags = getTags(rs);
 
                     return Post.builder()
                             .id(rs.getLong("id"))
