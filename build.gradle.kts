@@ -66,6 +66,8 @@ dependencies {
 
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
     testImplementation("org.springframework:spring-test:6.2.13")
+    testImplementation("org.hamcrest:hamcrest:2.2")
+    testImplementation("com.jayway.jsonpath:json-path:2.9.0")
 }
 
 tasks.test {
