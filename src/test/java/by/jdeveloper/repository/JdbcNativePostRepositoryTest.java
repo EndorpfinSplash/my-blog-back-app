@@ -3,6 +3,7 @@ package by.jdeveloper.repository;
 import by.jdeveloper.configuration.DataSourceConfiguration;
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.PostDto;
+import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,12 @@ class JdbcNativePostRepositoryTest {
                 }
         );
 
+        jdbcTemplate.update("INSERT INTO comment(text, post_id) VALUES (?, ?)",
+                ps -> {
+                    ps.setString(1, "Comment text for post");
+                    ps.setLong(2, 1L);
+                }
+        );
 
     }
 
@@ -145,10 +152,16 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void findAllCommentsByPostId() {
+        List<Comment> allCommentsByPostId = postRepository.findAllCommentsByPostId(1L);
+        assertEquals(1, allCommentsByPostId.size());
+        assertEquals("Comment text for post", allCommentsByPostId.getFirst().getText());
     }
 
     @Test
     void likesIncrease() {
+        Long likes = postRepository.likesIncrease(2L);
+
+        assertEquals(1, likes);
     }
 
     @Test
