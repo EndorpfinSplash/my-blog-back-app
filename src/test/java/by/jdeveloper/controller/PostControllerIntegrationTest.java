@@ -1,5 +1,7 @@
 package by.jdeveloper.controller;
 
+import by.jdeveloper.configuration.DataSourceConfiguration;
+import by.jdeveloper.configuration.WebConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +14,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import by.jdeveloper.configuration.DataSourceConfiguration;
-import by.jdeveloper.configuration.WebConfiguration;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -38,7 +38,9 @@ class PostControllerIntegrationTest {
     void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 
+        jdbcTemplate.execute("DELETE FROM image");
         jdbcTemplate.execute("DELETE FROM post");
+        jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
 
         jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
                 ps -> {
@@ -72,44 +74,60 @@ class PostControllerIntegrationTest {
     }
 
     @Test
-    void createUser_acceptsJson_andPersists() throws Exception {
+    void createPost_acceptsJson_andPersists() throws Exception {
         String json = """
-                  {"id":3,"firstName":"Анна","lastName":"Смирнова","age":28,"active":true}
+                  {
+                  "title":"Post for test",
+                  "text":"this is integration test text",
+                  "tags":["integration"]
+                  }
                 """;
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(3))
-                .andExpect(jsonPath("$.firstName").value("Анна"));
+                .andExpect(jsonPath("$.title").value("Post for test"))
+                .andExpect(jsonPath("$.likesCount").value(0))
+                .andExpect(jsonPath("$.tags[0]").value("integration"))
+                .andExpect(jsonPath("$.text").value("this is integration test text"));
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/posts?search=&pageNumber=1&pageSize=5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)));
+                .andExpect(jsonPath("$.posts", hasSize(3)));
     }
 
     @Test
-    void deleteUser_noContent() throws Exception {
-        mockMvc.perform(delete("/api/users/1"))
+    void deletePost_noContent() throws Exception {
+        mockMvc.perform(delete("/api/posts/1"))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/posts?search=&pageNumber=1&pageSize=5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.posts", hasSize(1)));
     }
 
     @Test
-    void uploadAndDownloadAvatar_success() throws Exception {
+    void uploadAndDownloadImage_success() throws Exception {
         byte[] pngStub = new byte[]{(byte) 137, 80, 78, 71};
-        MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", pngStub);
+        MockMultipartFile file = new MockMultipartFile("image", "testImage.png", "image/png", pngStub);
 
-        mockMvc.perform(multipart("/api/users/{id}/avatar", 1L).file(file))
+        mockMvc.perform(
+                        multipart("/api/posts/{id}/image", 1L)
+                                .file(file)
+                                .with(
+                                        request -> {
+                                            request.setMethod("PUT");
+                                            return request;
+                                        }
+                                )
+                )
                 .andExpect(status().isCreated())
                 .andExpect(content().string("ok"));
 
-        mockMvc.perform(get("/api/users/{id}/avatar", 1L))
+        mockMvc.perform(get("/api/posts/{id}/image", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_PNG))
                 .andExpect(header().string("Cache-Control", "no-store"))
