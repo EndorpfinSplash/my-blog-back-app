@@ -115,7 +115,7 @@ public class PostService {
         } catch (NumberFormatException e) {
             return new Comment();
         }
-        return postRepository.findCommentsByPostIdAndCommentId(postIdParsed, commentId);
+        return postRepository.findCommentByPostIdAndCommentId(postIdParsed, commentId);
     }
 
     public void deleteByPostIdAndCommentId(Long postId, Long commentId) {

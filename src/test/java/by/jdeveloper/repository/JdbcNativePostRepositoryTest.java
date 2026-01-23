@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "classpath:test-application.properties")
 class JdbcNativePostRepositoryTest {
 
+    public static final byte[] FILE_STUB = {(byte) 137, 80, 78, 71};
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -33,6 +34,10 @@ class JdbcNativePostRepositoryTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.execute("DELETE FROM comment");
+        jdbcTemplate.execute("ALTER TABLE comment ALTER COLUMN id RESTART WITH 1");
+
+        jdbcTemplate.execute("DELETE FROM image");
+
         jdbcTemplate.execute("DELETE FROM post");
         jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
 
@@ -73,6 +78,21 @@ class JdbcNativePostRepositoryTest {
                 }
         );
 
+        jdbcTemplate.update("INSERT INTO comment(text, post_id) VALUES (?, ?)",
+                ps -> {
+                    ps.setString(1, "Second comment for first post");
+                    ps.setLong(2, 1L);
+                }
+        );
+
+        jdbcTemplate.update("INSERT INTO image( post_id, file_name, data) VALUES (?, ?, ?)",
+                ps -> {
+                    ps.setLong(1, 1L);
+                    ps.setString(2, "Origin_file_name");
+                    ps.setBytes(3, FILE_STUB);
+                }
+        );
+
     }
 
     @Test
@@ -100,7 +120,7 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void findAllByNonExistedTag_shouldReturnEmptyList() {
-        Collection<PostDto> posts = postRepository.findAllByTagContains("tag");
+        Collection<PostDto> posts = postRepository.findAllByTagContains("absent");
 
         assertEquals(0, posts.size());
     }
@@ -158,7 +178,7 @@ class JdbcNativePostRepositoryTest {
     @Test
     void findAllCommentsByPostId() {
         List<Comment> allCommentsByPostId = postRepository.findAllCommentsByPostId(1L);
-        assertEquals(1, allCommentsByPostId.size());
+        assertEquals(2, allCommentsByPostId.size());
         assertEquals("Comment text for post", allCommentsByPostId.getFirst().getText());
     }
 
@@ -170,26 +190,55 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void findCommentsByPostIdAndCommentId() {
+    void findCommentByPostIdAndCommentId() {
+        Comment comment = postRepository.findCommentByPostIdAndCommentId(1L, 2L);
+
+        assertEquals(2L, comment.getId());
+        assertEquals(1L, comment.getPostId());
+        assertEquals("Second comment for first post", comment.getText());
     }
 
     @Test
     void deleteByPostIdAndCommentId() {
+        postRepository.deleteByPostIdAndCommentId(1L, 2L);
+
+        List<Comment> allComments = postRepository.findAllCommentsByPostId(1L);
+        assertEquals(1, allComments.size());
+        assertTrue(allComments.stream().noneMatch(comment -> comment.getId().equals(2L)));
     }
 
     @Test
     void saveFile() {
+        byte[] fileStub = new byte[]{(byte) 137, 80, 78, 71};
+        postRepository.saveFile(2L, "test_name", fileStub);
+
+        byte[] savedFile = postRepository.getFileByPostId(2L);
+        assertArrayEquals(fileStub,savedFile);
+//        assertEquals("test file", );
     }
 
     @Test
     void updateFileByPostId() {
+        byte[] newFile =new byte[]{(byte) 147, 90, 88, 81};
+        boolean isUpdated = postRepository.updateFileByPostId(1L, "updated_file_name", newFile);
+
+        byte[] updatedFile = postRepository.getFileByPostId(1L);
+        assertTrue(isUpdated);
+        assertArrayEquals(newFile, updatedFile);
     }
 
     @Test
     void getFileByPostId() {
+        byte[] originFile = postRepository.getFileByPostId(1L);
+
+        assertArrayEquals(FILE_STUB, originFile);
     }
 
     @Test
     void countFilesByPostId() {
+        Long filesQuantityPost1 = postRepository.countFilesByPostId(1L);
+        assertEquals(1, filesQuantityPost1);
+        Long filesQuantityPost2 = postRepository.countFilesByPostId(2L);
+        assertEquals(0, filesQuantityPost2);
     }
 }

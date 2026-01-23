@@ -31,7 +31,7 @@ public interface PostRepository {
 
     Comment save(Long postId, NewCommentDto newCommentDto);
 
-    Comment findCommentsByPostIdAndCommentId(Long postId, Long commentId);
+    Comment findCommentByPostIdAndCommentId(Long postId, Long commentId);
 
     void deleteByPostIdAndCommentId(Long postId, Long commentId);
 

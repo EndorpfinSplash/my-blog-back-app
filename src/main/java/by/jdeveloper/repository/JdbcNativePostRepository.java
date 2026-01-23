@@ -249,7 +249,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public Comment findCommentsByPostIdAndCommentId(Long postId, Long commentId) {
+    public Comment findCommentByPostIdAndCommentId(Long postId, Long commentId) {
         String sql = """
                 select c.id, c.text, c.post_id
                 from comment c
