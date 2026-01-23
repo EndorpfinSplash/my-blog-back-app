@@ -37,7 +37,10 @@ public class PostService {
     }
 
     public PostDto update(Long id, PostUpdateDto postUpdated) {
-        Post post = postRepository.findById(id);
+        if (postRepository.findById(id).isEmpty()) {
+            throw new RuntimeException("Post with id=" + id + " not found");
+        }
+        Post post = postRepository.findById(id).get();
         post.setTitle(postUpdated.getTitle());
         post.setText(postUpdated.getText());
         post.setTags(postUpdated.getTags());
@@ -89,7 +92,9 @@ public class PostService {
     }
 
     public PostDto findById(Long id) {
-        return postMapper.toDto(postRepository.findById(id));
+        return postRepository.findById(id).isEmpty()
+                ? null
+                : postMapper.toDto(postRepository.findById(id).get());
     }
 
     public List<Comment> getCommentsByPostId(String postId) {

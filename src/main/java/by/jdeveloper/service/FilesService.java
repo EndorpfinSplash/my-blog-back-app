@@ -13,12 +13,12 @@ public class FilesService {
 
     private final PostRepository postRepository;
 
-    public void uploadImage(Long postId, MultipartFile image) throws IOException {
+    public boolean uploadImage(Long postId, MultipartFile image) throws IOException {
         String imageName = image.getOriginalFilename();
         if (postRepository.countFilesByPostId(postId).equals(0L)) {
             postRepository.saveFile(postId, imageName, image.getBytes());
         }
-        postRepository.updateFileByPostId(postId, imageName, image.getBytes());
+        return postRepository.updateFileByPostId(postId, imageName, image.getBytes());
     }
 
     public byte[] downloadFile(Long postId) {

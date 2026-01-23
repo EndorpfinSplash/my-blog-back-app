@@ -1,6 +1,7 @@
 package by.jdeveloper.controller;
 
 import by.jdeveloper.service.FilesService;
+import by.jdeveloper.service.PostService;
 import jakarta.servlet.annotation.MultipartConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -27,10 +28,13 @@ import java.io.IOException;
 public class FilesController {
 
     private final FilesService filesService;
+    private final PostService postService;
 
     @GetMapping("/{id}/image")
     public ResponseEntity<byte[]> downloadFile(@PathVariable(name = "id") Long postId) {
         byte[] file = filesService.downloadFile(postId);
+
+
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -40,7 +44,21 @@ public class FilesController {
     @PutMapping("/{id}/image")
     public ResponseEntity uploadImage(@PathVariable(name = "id") Long postId,
                                       @RequestParam("image") MultipartFile image) throws IOException {
-        filesService.uploadImage(postId, image);
+
+        if (postService.findById(postId) == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Post not found");
+        }
+        if (image.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body("empty file");
+        }
+        boolean ok = filesService.uploadImage(postId, image);
+        if (!ok) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("failed to update image");
+        }
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body("ok");

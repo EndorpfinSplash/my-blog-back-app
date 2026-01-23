@@ -135,32 +135,60 @@ class PostControllerIntegrationTest {
     }
 
     @Test
-    void uploadAvatar_emptyFile_badRequest() throws Exception {
-        MockMultipartFile empty = new MockMultipartFile("file", "empty.png", "image/png", new byte[0]);
+    void uploadImage_emptyFile_badRequest() throws Exception {
+        MockMultipartFile empty = new MockMultipartFile(
+                "image",
+                "empty.png",
+                "image/png",
+                new byte[0]
+        );
 
-        mockMvc.perform(multipart("/api/users/{id}/avatar", 1L).file(empty))
+        mockMvc.perform(
+                        multipart("/api/posts/{id}/image", 1L)
+                                .file(empty)
+                                .with(
+                                        request -> {
+                                            request.setMethod("PUT");
+                                            return request;
+                                        }
+                                )
+                )
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("empty file"));
     }
 
     @Test
-    void uploadAvatar_userNotFound_404() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", new byte[]{1, 2, 3});
+    void uploadImage_userNotFound_404() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "image",
+                "image.png",
+                "image/png",
+                new byte[]{1, 2, 3}
+        );
 
-        mockMvc.perform(multipart("/api/users/{id}/avatar", 999L).file(file))
+        mockMvc.perform(
+                        multipart("/api/posts/{id}/image", 999L)
+                                .file(file)
+                                .with(
+                                        request -> {
+                                            request.setMethod("PUT");
+                                            return request;
+                                        }
+                                )
+                )
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("user not found"));
+                .andExpect(content().string("Post not found"));
     }
 
     @Test
-    void getAvatar_userHasNoAvatar_404() throws Exception {
-        mockMvc.perform(get("/api/users/{id}/avatar", 2L))
+    void getImage_userHasNoImage_404() throws Exception {
+        mockMvc.perform(get("/api/users/{id}/image", 2L))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void getAvatar_userNotFound_404() throws Exception {
-        mockMvc.perform(get("/api/users/{id}/avatar", 777L))
+    void getImage_userNotFound_404() throws Exception {
+        mockMvc.perform(get("/api/users/{id}/image", 777L))
                 .andExpect(status().isNotFound());
     }
 }

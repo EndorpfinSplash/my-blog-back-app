@@ -7,6 +7,7 @@ import by.jdeveloper.model.Post;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface PostRepository {
 
@@ -20,7 +21,7 @@ public interface PostRepository {
 
     Post update(Long id, Post post);
 
-    Post findById(Long id);
+    Optional<Post> findById(Long id);
 
     void deleteById(Long id);
 
@@ -36,7 +37,7 @@ public interface PostRepository {
 
     void saveFile(Long postId, String name, byte[] data);
 
-    void updateFileByPostId(Long postId, String fileName, byte[] data);
+    boolean updateFileByPostId(Long postId, String fileName, byte[] data);
 
     byte[] getFileByPostId(Long postId);
 

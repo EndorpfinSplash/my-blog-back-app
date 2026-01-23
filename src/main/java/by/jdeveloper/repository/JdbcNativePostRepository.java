@@ -7,6 +7,7 @@ import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
@@ -193,7 +195,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public Post findById(Long postId) {
+    public Optional<Post> findById(Long postId) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,
                        count(c.id) as comment_count
@@ -202,22 +204,28 @@ public class JdbcNativePostRepository implements PostRepository {
                 where p.id = ?
                 group by p.id, p.title, p.text, p.likes_count, p.tags
                 """;
-        return jdbcTemplate.queryForObject(
-                sql,
-                (rs, rowNum) -> {
-                    List<String> tags = getTags(rs);
+        Post post = null;
+        try {
+            post = jdbcTemplate.queryForObject(
+                    sql,
+                    (rs, rowNum) -> {
+                        List<String> tags = getTags(rs);
 
-                    return Post.builder()
-                            .id(rs.getLong("id"))
-                            .title(rs.getString("title"))
-                            .text(rs.getString("text"))
-                            .tags(tags)
-                            .likesCount(rs.getLong("likes_count"))
-                            .commentCount(rs.getLong("comment_count"))
-                            .build();
-                },
-                postId
-        );
+                        return Post.builder()
+                                .id(rs.getLong("id"))
+                                .title(rs.getString("title"))
+                                .text(rs.getString("text"))
+                                .tags(tags)
+                                .likesCount(rs.getLong("likes_count"))
+                                .commentCount(rs.getLong("comment_count"))
+                                .build();
+                    },
+                    postId
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(post);
     }
 
     @Override
@@ -236,12 +244,6 @@ public class JdbcNativePostRepository implements PostRepository {
 
     @Override
     public Long likesIncrease(Long postId) {
-/*        String sql = """
-                update post
-                set likes_count = likes_count + 1
-                where id = ?
-                returning likes_count
-                """;*/
         jdbcTemplate.update("update post set likes_count = likes_count + 1 where id = ?", postId);
         return jdbcTemplate.queryForObject("select likes_count from post where id = ?", Long.class, postId);
     }
@@ -282,10 +284,15 @@ public class JdbcNativePostRepository implements PostRepository {
                 postId, fileName, data);
     }
 
-    public void updateFileByPostId(Long postId, String fileName, byte[] data) {
-        jdbcTemplate.update(
-                "update image set file_name= ?, data = ? where post_id= ?",
-                fileName, data, postId);
+    public boolean updateFileByPostId(Long postId, String fileName, byte[] data) {
+        try {
+            jdbcTemplate.update(
+                    "update image set file_name= ?, data = ? where post_id= ?",
+                    fileName, data, postId);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     @Override

@@ -32,7 +32,9 @@ class JdbcNativePostRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.execute("DELETE FROM comment");
         jdbcTemplate.execute("DELETE FROM post");
+        jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
 
         jdbcTemplate.update("INSERT INTO post(title, text, tags, likes_count) VALUES (?, ?, ?, ?)",
                 ps -> {
@@ -113,7 +115,7 @@ class JdbcNativePostRepositoryTest {
                 .build();
         postRepository.save(post);
 
-        Post saved = postRepository.findById(4L);
+        Post saved = postRepository.findById(4L).get();
 
         assertNotNull(saved);
         assertEquals(4L, saved.getId());
@@ -122,9 +124,6 @@ class JdbcNativePostRepositoryTest {
         assertEquals("saved_tag", saved.getTags().getFirst());
     }
 
-    @Test
-    void testSave() {
-    }
 
     @Test
     void deleteById() {
@@ -137,11 +136,17 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void update() {
+        Post modifiedPost = Post.builder()
+                .title("Modified title")
+                .text("Modified text")
+                .tags(List.of("saved_tag"))
+                .build();
+        postRepository.update(1L, modifiedPost);
     }
 
     @Test
     void findById() {
-        Post post = postRepository.findById(3L);
+        Post post = postRepository.findById(3L).get();
 
         assertEquals("Title", post.getTitle());
         assertEquals("simple text", post.getText());
