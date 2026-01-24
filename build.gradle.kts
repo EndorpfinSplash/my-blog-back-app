@@ -68,6 +68,9 @@ dependencies {
     testImplementation("org.springframework:spring-test:6.2.13")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
+    testImplementation("org.mockito:mockito-core:5.14.2")
+//    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
+//    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
 }
 
 tasks.test {

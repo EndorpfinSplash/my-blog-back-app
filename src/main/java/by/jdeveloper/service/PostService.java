@@ -28,7 +28,7 @@ public class PostService {
         return postMapper.toDto(postRepository.save(post));
     }
 
-    public Comment save(Long postId, NewCommentDto newCommentDto) {
+    public Comment saveComment(Long postId, NewCommentDto newCommentDto) {
         return postRepository.save(postId, newCommentDto);
     }
 
@@ -37,13 +37,13 @@ public class PostService {
     }
 
     public PostDto update(Long id, PostUpdateDto postUpdated) {
-        if (postRepository.findById(id).isEmpty()) {
-            throw new RuntimeException("Post with id=" + id + " not found");
-        }
-        Post post = postRepository.findById(id).get();
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post with id=" + id + " not found"));
+
         post.setTitle(postUpdated.getTitle());
         post.setText(postUpdated.getText());
         post.setTags(postUpdated.getTags());
+
         return postMapper.toDto(postRepository.update(id, post));
     }
 

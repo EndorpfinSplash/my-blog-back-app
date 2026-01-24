@@ -87,6 +87,6 @@ public class PostController {
     public Comment save(
             @PathVariable("id") Long postId,
             @RequestBody NewCommentDto newCommentDto) {
-        return service.save(postId, newCommentDto);
+        return service.saveComment(postId, newCommentDto);
     }
 }

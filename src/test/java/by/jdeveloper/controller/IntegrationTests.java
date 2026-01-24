@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:test-application.properties")
-class PostControllerIntegrationTest {
+class IntegrationTests {
 
     @Autowired
     private WebApplicationContext wac;
@@ -39,6 +39,8 @@ class PostControllerIntegrationTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 
         jdbcTemplate.execute("DELETE FROM image");
+        jdbcTemplate.execute("DELETE FROM comment");
+        jdbcTemplate.execute("ALTER TABLE comment ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("DELETE FROM post");
         jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
 
