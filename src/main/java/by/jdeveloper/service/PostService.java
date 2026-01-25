@@ -98,27 +98,26 @@ public class PostService {
     }
 
     public List<Comment> getCommentsByPostId(String postId) {
-        long postIdParsed;
-        try {
-            postIdParsed = Long.parseLong(postId);
-        } catch (NumberFormatException e) {
-            return new ArrayList<>() {
-            };
-        }
+        long postIdParsed = getPostIdParsed(postId);
         return postRepository.findAllCommentsByPostId(postIdParsed);
     }
 
     public Comment getCommentsByPostIdAndCommentId(String postId, Long commentId) {
-        long postIdParsed;
-        try {
-            postIdParsed = Long.parseLong(postId);
-        } catch (NumberFormatException e) {
-            return new Comment();
-        }
+        long postIdParsed = getPostIdParsed(postId);
         return postRepository.findCommentByPostIdAndCommentId(postIdParsed, commentId);
     }
 
     public void deleteByPostIdAndCommentId(Long postId, Long commentId) {
         postRepository.deleteByPostIdAndCommentId(postId, commentId);
+    }
+
+    private static long getPostIdParsed(String postId) {
+        long postIdParsed;
+        try {
+            postIdParsed = Long.parseLong(postId);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid postId!");
+        }
+        return postIdParsed;
     }
 }
