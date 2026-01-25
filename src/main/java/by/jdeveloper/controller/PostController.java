@@ -9,6 +9,7 @@ import by.jdeveloper.model.Comment;
 import by.jdeveloper.service.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,13 +37,13 @@ public class PostController {
         return service.findPosts(search, pageNumber, pageSize);
     }
 
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public PostDto save(@RequestBody NewPostDto newPostDto) {
         return service.save(newPostDto);
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public PostDto findById(@PathVariable("id") Long id) {
         return service.findById(id);
     }
@@ -61,7 +62,7 @@ public class PostController {
         service.deleteByPostIdAndCommentId(postId, commentId);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public PostDto update(@PathVariable(name = "id") Long id, @RequestBody PostUpdateDto postUpdated) {
         return service.update(id, postUpdated);
     }
@@ -71,19 +72,19 @@ public class PostController {
         return service.incrementLike(id);
     }
 
-    @GetMapping("/{id}/comments")
+    @GetMapping(value = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Comment> getComments(@PathVariable("id") String postId) {
         return service.getCommentsByPostId(postId);
     }
 
-    @GetMapping("/{id}/comments/{commentId}")
+    @GetMapping(value = "/{id}/comments/{commentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Comment getComment(
             @PathVariable("id") String postId,
             @PathVariable("commentId") Long commentId) {
         return service.getCommentsByPostIdAndCommentId(postId, commentId);
     }
 
-    @PostMapping("/{id}/comments")
+    @PostMapping(value = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
     public Comment save(
             @PathVariable("id") Long postId,
             @RequestBody NewCommentDto newCommentDto) {

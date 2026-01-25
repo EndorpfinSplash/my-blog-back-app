@@ -66,7 +66,7 @@ class IntegrationTests {
     }
 
     @Test
-    void getUsers_returnsJsonArray() throws Exception {
+    void getPosts_returnsJsonArray() throws Exception {
         mockMvc.perform(get("/api/posts?search=&pageNumber=1&pageSize=5"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

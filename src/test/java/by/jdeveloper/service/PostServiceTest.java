@@ -35,6 +35,7 @@ class PostServiceTest {
     @BeforeEach
     void resetMocks() {
         reset(postRepository);
+        reset(postMapper);
     }
 
     @Test
