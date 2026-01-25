@@ -7,10 +7,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("unit-test")
 @ComponentScan("by.jdeveloper.service")
-public class TestConfig {
+public class UnitTestConfig {
 
     @Bean
     @Primary

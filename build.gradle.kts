@@ -52,9 +52,9 @@ dependencies {
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
     testImplementation("org.springframework:spring-test:6.2.13")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("org.junit:junit-bom:5.11.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.platform:junit-platform-launcher")
 
     compileOnly("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
@@ -68,9 +68,10 @@ dependencies {
     testImplementation("org.springframework:spring-test:6.2.13")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
-    testImplementation("org.mockito:mockito-core:5.14.2")
-//    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
-//    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
+
+    testImplementation(platform("org.mockito:mockito-bom:5.14.2"))
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
 }
 
 tasks.test {
