@@ -2,25 +2,12 @@ package by.jdeveloper.repository;
 
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
-import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
-import lombok.AllArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Array;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
+import java.awt.*;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,24 +15,24 @@ import java.util.Optional;
 
 @Repository
 public class InnerPostRepository implements PostRepository {
-    private final Map<Long, PostDto> postStorage = new HashMap<>();
+    private final Map<Long, Post> postStorage = new HashMap<>();
     private final Map<Long, Map<Long, Comment>> commentStorage = new HashMap<>();
-    private final Map<Long, Map<Long, byte[]>> imageStorage = new HashMap<>();
+    private final Map<Long, Image> imageStorage = new HashMap<>();
 
     @Override
-    public Collection<PostDto> findAllByTitleContains(String search) {
+    public Collection<Post> findAllByTitleContains(String search) {
         return postStorage.values().stream()
                 .filter(post -> post.getTitle().contains(search))
                 .toList();
     }
 
     @Override
-    public List<PostDto> getAll() {
+    public List<Post> getAll() {
         return postStorage.values().stream().toList();
     }
 
     @Override
-    public Collection<PostDto> findAllByTagContains(String tag) {
+    public Collection<Post> findAllByTagContains(String tag) {
         return postStorage.values().stream()
                 .filter(post -> post.getTags().contains(tag))
                 .toList();

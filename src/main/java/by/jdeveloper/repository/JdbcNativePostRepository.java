@@ -2,7 +2,6 @@ package by.jdeveloper.repository;
 
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
-import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
@@ -33,7 +32,7 @@ public class JdbcNativePostRepository implements PostRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<PostDto> findAllByTitleContains(String search) {
+    public List<Post> findAllByTitleContains(String search) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,
                        count(c.id) as comments_count
@@ -46,7 +45,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 sql,
                 (rs, rowNum) -> {
                     List<String> tags = getTags(rs);
-                    return PostDto.builder()
+                    return Post.builder()
                             .id(rs.getLong("id"))
                             .title(rs.getString("title"))
                             .text(rs.getString("text"))
@@ -59,7 +58,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public List<PostDto> getAll() {
+    public List<Post> getAll() {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags
                 from post p
@@ -68,7 +67,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 sql,
                 (rs, rowNum) -> {
                     List<String> tags = getTags(rs);
-                    return PostDto.builder()
+                    return Post.builder()
                             .id(rs.getLong("id"))
                             .title(rs.getString("title"))
                             .text(rs.getString("text"))
@@ -87,7 +86,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public Collection<PostDto> findAllByTagContains(String tag) {
+    public Collection<Post> findAllByTagContains(String tag) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,
                        count(c.id) as comments_count
@@ -100,7 +99,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 sql,
                 (rs, rowNum) -> {
                     List<String> tags = getTags(rs);
-                    return PostDto.builder()
+                    return Post.builder()
                             .id(rs.getLong("id"))
                             .title(rs.getString("title"))
                             .text(rs.getString("text"))

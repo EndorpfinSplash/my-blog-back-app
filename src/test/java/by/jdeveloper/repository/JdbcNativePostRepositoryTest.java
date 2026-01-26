@@ -2,7 +2,6 @@ package by.jdeveloper.repository;
 
 import by.jdeveloper.configuration.DataSourceConfiguration;
 import by.jdeveloper.dao.PostRepository;
-import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,30 +96,30 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void findAllByExistedTitle_shouldReturnPosts() {
-        Collection<PostDto> posts = postRepository.findAllByTitleContains("test");
+        Collection<by.jdeveloper.model.Post> posts = postRepository.findAllByTitleContains("test");
 
         assertEquals(2, posts.size());
-        assertTrue(List.of(1L, 2L).containsAll(posts.stream().map(PostDto::getId).toList()));
+        assertTrue(List.of(1L, 2L).containsAll(posts.stream().map(Post::getId).toList()));
     }
 
     @Test
     void findAllByNonExistedTitle_shouldReturnEmptyList() {
-        Collection<PostDto> posts = postRepository.findAllByTitleContains("absent test");
+        Collection<Post> posts = postRepository.findAllByTitleContains("absent test");
 
         assertEquals(0, posts.size());
     }
 
     @Test
     void findAllByExistedTag_shouldReturnPosts() {
-        Collection<PostDto> posts = postRepository.findAllByTagContains("simple_tag");
+        Collection<Post> posts = postRepository.findAllByTagContains("simple_tag");
 
         assertEquals(2, posts.size());
-        assertTrue(posts.stream().map(PostDto::getId).toList().containsAll(List.of(1L, 3L)));
+        assertTrue(posts.stream().map(Post::getId).toList().containsAll(List.of(1L, 3L)));
     }
 
     @Test
     void findAllByNonExistedTag_shouldReturnEmptyList() {
-        Collection<PostDto> posts = postRepository.findAllByTagContains("absent");
+        Collection<Post> posts = postRepository.findAllByTagContains("absent");
 
         assertEquals(0, posts.size());
     }
@@ -149,7 +148,7 @@ class JdbcNativePostRepositoryTest {
     void deleteById() {
         postRepository.deleteById(3L);
 
-        List<PostDto> allPosts = postRepository.getAll();
+        List<Post> allPosts = postRepository.getAll();
         assertEquals(2, allPosts.size());
         assertTrue(allPosts.stream().noneMatch(u -> u.getId().equals(3L)));
     }

@@ -2,10 +2,10 @@ package by.jdeveloper.controller;
 
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
-import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.dto.PostUpdateDto;
 import by.jdeveloper.dto.PostsResponse;
 import by.jdeveloper.model.Comment;
+import by.jdeveloper.model.Post;
 import by.jdeveloper.service.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,12 +39,12 @@ public class PostController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public PostDto save(@RequestBody NewPostDto newPostDto) {
+    public Post save(@RequestBody NewPostDto newPostDto) {
         return service.save(newPostDto);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public PostDto findById(@PathVariable("id") Long id) {
+    public Post findById(@PathVariable("id") Long id) {
         return service.findById(id);
     }
 
@@ -63,7 +63,7 @@ public class PostController {
     }
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public PostDto update(@PathVariable(name = "id") Long id, @RequestBody PostUpdateDto postUpdated) {
+    public Post update(@PathVariable(name = "id") Long id, @RequestBody PostUpdateDto postUpdated) {
         return service.update(id, postUpdated);
     }
 

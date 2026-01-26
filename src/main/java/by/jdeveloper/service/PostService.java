@@ -3,7 +3,6 @@ package by.jdeveloper.service;
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
-import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.dto.PostUpdateDto;
 import by.jdeveloper.dto.PostsResponse;
 import by.jdeveloper.mapper.PostMapper;
@@ -23,9 +22,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
 
-    public PostDto save(NewPostDto newPostDto) {
+    public Post save(NewPostDto newPostDto) {
         Post post = postMapper.toEntity(newPostDto);
-        return postMapper.toDto(postRepository.save(post));
+        return postRepository.save(post);
     }
 
     public Comment saveComment(Long postId, NewCommentDto newCommentDto) {
@@ -36,7 +35,7 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
-    public PostDto update(Long id, PostUpdateDto postUpdated) {
+    public Post update(Long id, PostUpdateDto postUpdated) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post with id=" + id + " not found"));
 
@@ -44,7 +43,7 @@ public class PostService {
         post.setText(postUpdated.getText());
         post.setTags(postUpdated.getTags());
 
-        return postMapper.toDto(postRepository.update(id, post));
+        return postRepository.update(id, post);
     }
 
     public PostsResponse findPosts(String search,
@@ -61,7 +60,7 @@ public class PostService {
             titleSearchList.add(searchWord);
         }
 
-        ArrayList<PostDto> searchedPosts = new ArrayList<>();
+        ArrayList<Post> searchedPosts = new ArrayList<>();
         if (!tagSearchList.isEmpty()) {
             tagSearchList.forEach(tag -> searchedPosts.addAll(postRepository.findAllByTagContains(tag)));
         }
@@ -78,7 +77,7 @@ public class PostService {
         int lastPage = (int) Math.ceil((double) searchedPosts.size() / pageSize);
         int fromIndex = (pageNumber - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, searchedPosts.size());
-        List<PostDto> postsSlice = searchedPosts.subList(fromIndex, toIndex);
+        List<Post> postsSlice = searchedPosts.subList(fromIndex, toIndex);
         return PostsResponse.builder()
                 .posts(postsSlice)
                 .hasNext(pageNumber < lastPage)
@@ -91,10 +90,10 @@ public class PostService {
         return postRepository.likesIncrease(postId);
     }
 
-    public PostDto findById(Long id) {
+    public Post findById(Long id) {
         return postRepository.findById(id).isEmpty()
                 ? null
-                : postMapper.toDto(postRepository.findById(id).get());
+                : postRepository.findById(id).get();
     }
 
     public List<Comment> getCommentsByPostId(String postId) {

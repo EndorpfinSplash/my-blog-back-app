@@ -1,5 +1,6 @@
 package by.jdeveloper.dto;
 
+import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.util.List;
 @Builder
 public class PostsResponse {
     @Builder.Default
-    private List<PostDto> posts = new ArrayList<>();
+    private List<Post> posts = new ArrayList<>();
     private boolean hasPrev;
     private boolean hasNext;
     private int lastPage;

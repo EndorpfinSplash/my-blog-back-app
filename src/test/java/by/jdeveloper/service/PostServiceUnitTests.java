@@ -3,7 +3,6 @@ package by.jdeveloper.service;
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
-import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.dto.PostUpdateDto;
 import by.jdeveloper.mapper.PostMapper;
 import by.jdeveloper.model.Post;
@@ -85,13 +84,11 @@ class PostServiceUnitTests {
         Post post = new Post();
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(postRepository.update(anyLong(), any(Post.class))).thenReturn(post);
-        when(postMapper.toDto(post)).thenReturn(new PostDto());
 
         postService.update(1L, new PostUpdateDto());
 
         verify(postRepository, times(1)).findById(1L);
         verify(postRepository, times(1)).update(anyLong(), any(Post.class));
-        verify(postMapper, times(1)).toDto(any(Post.class));
     }
 
     @Test
@@ -122,7 +119,6 @@ class PostServiceUnitTests {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
         postService.findById(1L);
         verify(postRepository, times(1)).findById(1L);
-        verify(postMapper, never()).toDto(any());
     }
 
     @Test

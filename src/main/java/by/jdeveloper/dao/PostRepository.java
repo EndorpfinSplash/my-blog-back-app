@@ -1,7 +1,6 @@
 package by.jdeveloper.dao;
 
 import by.jdeveloper.dto.NewCommentDto;
-import by.jdeveloper.dto.PostDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
 
@@ -11,11 +10,11 @@ import java.util.Optional;
 
 public interface PostRepository {
 
-    Collection<PostDto> findAllByTitleContains(String search);
+    Collection<Post> findAllByTitleContains(String search);
 
-    List<PostDto> getAll();
+    List<Post> getAll();
 
-    Collection<PostDto> findAllByTagContains(String tag);
+    Collection<Post> findAllByTagContains(String tag);
 
     Post save(Post post);
 
