@@ -28,21 +28,27 @@ import java.util.Optional;
 
 @Repository
 public class InnerPostRepository implements PostRepository {
-    private final Map<Long, Post> postStorage = new HashMap<>();
+    private final Map<Long, PostDto> postStorage = new HashMap<>();
+    private final Map<Long, Map<Long, Comment>> commentStorage = new HashMap<>();
+    private final Map<Long, Map<Long, byte[]>> imageStorage = new HashMap<>();
 
     @Override
     public Collection<PostDto> findAllByTitleContains(String search) {
-        return List.of();
+        return postStorage.values().stream()
+                .filter(post -> post.getTitle().contains(search))
+                .toList();
     }
 
     @Override
     public List<PostDto> getAll() {
-        return List.of();
+        return postStorage.values().stream().toList();
     }
 
     @Override
     public Collection<PostDto> findAllByTagContains(String tag) {
-        return List.of();
+        return postStorage.values().stream()
+                .filter(post -> post.getTags().contains(tag))
+                .toList();
     }
 
     @Override

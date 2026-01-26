@@ -19,5 +19,5 @@ public class Post {
     @Builder.Default
     private Long likesCount = 0L;
     @Builder.Default
-    private Long commentCount = 0L;
+    private Long commentsCount = 0L;
 }

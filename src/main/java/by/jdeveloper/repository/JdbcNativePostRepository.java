@@ -8,7 +8,6 @@ import by.jdeveloper.model.Post;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -200,7 +199,7 @@ public class JdbcNativePostRepository implements PostRepository {
     public Optional<Post> findById(Long postId) {
         String sql = """
                 select p.id, p.title, p.text, p.likes_count, p.tags,
-                       count(c.id) as comment_count
+                       count(c.id) as comments_count
                 from post p
                 left join comment c on p.id = c.post_id
                 where p.id = ?
@@ -219,7 +218,7 @@ public class JdbcNativePostRepository implements PostRepository {
                                 .text(rs.getString("text"))
                                 .tags(tags)
                                 .likesCount(rs.getLong("likes_count"))
-                                .commentCount(rs.getLong("comment_count"))
+                                .commentsCount(rs.getLong("comments_count"))
                                 .build();
                     },
                     postId
