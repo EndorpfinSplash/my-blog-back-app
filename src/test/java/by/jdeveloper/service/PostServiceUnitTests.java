@@ -22,8 +22,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringJUnitConfig(UnitTestConfig.class)
-@ActiveProfiles("unit-test")
-class PostServiceTest {
+@ActiveProfiles("unit-tests")
+class PostServiceUnitTests {
 
     @Autowired
     PostRepository postRepository;
