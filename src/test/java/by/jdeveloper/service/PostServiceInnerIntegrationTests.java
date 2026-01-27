@@ -4,6 +4,7 @@ import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
 import by.jdeveloper.dto.PostUpdateDto;
+import by.jdeveloper.dto.PostsResponse;
 import by.jdeveloper.mapper.PostMapper;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
@@ -49,6 +50,12 @@ class PostServiceInnerIntegrationTests {
                 .build();
 
         postService.save(newPostDto);
+
+        NewCommentDto newComment = NewCommentDto.builder()
+                .postId(0L)
+                .text("zeroth comment")
+                .build();
+        postService.saveComment(0L, newComment);
     }
 
     @Test
@@ -119,39 +126,71 @@ class PostServiceInnerIntegrationTests {
 
     @Test
     void findPosts() {
-        postService.findPosts("", 1, 10);
-        verify(postRepository, times(1)).findAllByTitleContains("");
+        PostsResponse posts = postService.findPosts("", 1, 10);
+
+        assertEquals(1, posts.getPosts().size());
+        assertEquals("zero title", posts.getPosts().getFirst().getTitle());
+    }
+
+    @Test
+    void findUnexistedPosts() {
+        PostsResponse posts = postService.findPosts("unexisted", 1, 10);
+
+        assertEquals(0, posts.getPosts().size());
     }
 
     @Test
     void findPosts_when_tag_sended() {
-        postService.findPosts("#tag", 1, 10);
-        verify(postRepository, times(1)).findAllByTagContains("tag");
+        PostsResponse posts = postService.findPosts("#zero_tag", 1, 10);
+        assertEquals(1, posts.getPosts().size());
+        assertEquals("zero title", posts.getPosts().getFirst().getTitle());
+    }
+
+    @Test
+    void findPosts_when_unexisted_tag_sended() {
+        PostsResponse posts = postService.findPosts("#unexisted", 1, 10);
+        assertEquals(0, posts.getPosts().size());
     }
 
     @Test
     void incrementLike() {
-        postService.incrementLike(1L);
-        verify(postRepository, times(1)).likesIncrease(1L);
+        Long incrementedLike = postService.incrementLike(0L);
+
+        Post post = postService.findById(0L);
+        assertEquals(1, incrementedLike);
+        assertEquals(1, post.getLikesCount());
+
+        for (int i = 0; i < 10; i++) {
+            postService.incrementLike(0L);
+        }
+        assertEquals(11, post.getLikesCount());
     }
 
     @Test
     void findById() {
-        postService.findById(1L);
-        verify(postRepository, times(1)).findById(1L);
+        Post post = postService.findById(0L);
+
+        assertNotNull(post);
+        assertEquals(0L, post.getId());
+        assertEquals("zero title", post.getTitle());
+        assertEquals("init text", post.getText());
+        assertEquals("zero_tag", post.getTags().getFirst());
     }
 
     @Test
     void findById_empty() {
-        when(postRepository.findById(1L)).thenReturn(Optional.empty());
-        postService.findById(1L);
-        verify(postRepository, times(1)).findById(1L);
+        Post post = postService.findById(999L);
+        assertNull(post);
     }
 
     @Test
     void getCommentsByPostId() {
-        postService.getCommentsByPostId("1");
-        verify(postRepository, times(1)).findAllCommentsByPostId(1L);
+        List<Comment> comments = postService.getCommentsByPostId("0");
+
+        assertEquals(1, comments.size());
+        assertEquals("zeroth comment", comments.getFirst().getText());
+        assertEquals(0L, comments.getFirst().getPostId());
+        assertEquals(0L, comments.getFirst().getId());
     }
 
     @Test
@@ -161,14 +200,17 @@ class PostServiceInnerIntegrationTests {
                 () -> postService.getCommentsByPostId("X")
         );
         assertEquals("Invalid postId!", illegalArgumentException.getMessage());
-        verify(postRepository, never()).findAllCommentsByPostId(any());
     }
 
     @Test
     void getCommentsByPostIdAndCommentId() {
-        postService.getCommentsByPostIdAndCommentId("1", 1L);
-        verify(postRepository, times(1)).findCommentByPostIdAndCommentId(1L, 1L);
+        Comment comment = postService.getCommentsByPostIdAndCommentId("0", 0L);
+
+        assertEquals("zeroth comment", comment.getText());
+        assertEquals(0L, comment.getPostId());
+        assertEquals(0L, comment.getId());
     }
+
 
     @Test
     void getCommentsByPostIdAndCommentId_InvalidPost() {
@@ -177,12 +219,13 @@ class PostServiceInnerIntegrationTests {
                 () -> postService.getCommentsByPostIdAndCommentId("X", 1L)
         );
         assertEquals("Invalid postId!", illegalArgumentException.getMessage());
-        verify(postRepository, never()).findAllCommentsByPostId(any());
     }
 
     @Test
     void deleteByPostIdAndCommentId() {
-        postService.deleteByPostIdAndCommentId(1L, 1L);
-        verify(postRepository, times(1)).deleteByPostIdAndCommentId(1L, 1L);
+        postService.deleteByPostIdAndCommentId(0L, 0L);
+
+        List<Comment> comments = postService.getCommentsByPostId("0");
+        assertEquals(0, comments.size());
     }
 }

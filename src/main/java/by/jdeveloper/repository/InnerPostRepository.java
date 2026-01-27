@@ -34,7 +34,9 @@ public class InnerPostRepository implements PostRepository {
 
     @Override
     public List<Post> getAll() {
-        return postStorage.values().stream().toList();
+        return postStorage.values()
+                .stream()
+                .toList();
     }
 
     @Override
@@ -69,6 +71,8 @@ public class InnerPostRepository implements PostRepository {
     @Override
     public void deleteById(Long id) {
         postStorage.remove(id);
+        commentStorage.remove(id);
+        imageStorage.remove(id);
     }
 
     @Override
@@ -81,7 +85,7 @@ public class InnerPostRepository implements PostRepository {
 
     @Override
     public List<Comment> findAllCommentsByPostId(Long postId) {
-        return List.of();
+        return commentStorage.get(postId).values().stream().toList();
     }
 
     @Override
