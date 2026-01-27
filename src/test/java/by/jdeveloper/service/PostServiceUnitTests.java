@@ -47,9 +47,9 @@ class PostServiceUnitTests {
                 .tags(List.of("new_tag"))
                 .build();
 
-        Post postForSave = new Post();
-        when(postMapper.toEntity(newPostDto)).thenReturn(postForSave);
-        when(postRepository.save(any(Post.class))).thenReturn(postForSave);
+        Post mockPost = new Post();
+        when(postMapper.toEntity(newPostDto)).thenReturn(mockPost);
+        when(postRepository.save(any(Post.class))).thenReturn(mockPost);
 
         postService.save(newPostDto);
         verify(postMapper, times(1)).toEntity(any(NewPostDto.class));

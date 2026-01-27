@@ -5,9 +5,10 @@ import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
 import by.jdeveloper.dto.PostUpdateDto;
 import by.jdeveloper.mapper.PostMapper;
+import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
+import by.jdeveloper.repository.InnerPostRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,33 +18,37 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringJUnitConfig(InnerIntegrationTestConfig.class)
 @ActiveProfiles("integration-tests")
-@Disabled
 class PostServiceInnerIntegrationTests {
 
     @Autowired
     PostRepository postRepository;
 
     @Autowired
-    PostMapper postMapper;
-
-    @Autowired
     PostService postService;
 
     @BeforeEach
-    void resetMocks() {
-        reset(postRepository);
-        reset(postMapper);
+    void initRepository() {
+        InnerPostRepository innerRepo = (InnerPostRepository) postRepository;
+        innerRepo.resetRepository();
+
+        NewPostDto newPostDto = NewPostDto.builder()
+                .title("zero title")
+                .text("init text")
+                .tags(List.of("zero_tag"))
+                .build();
+
+        postService.save(newPostDto);
     }
 
     @Test
@@ -54,31 +59,40 @@ class PostServiceInnerIntegrationTests {
                 .tags(List.of("new_tag"))
                 .build();
 
-        Post postForSave = new Post();
-        when(postMapper.toEntity(newPostDto)).thenReturn(postForSave);
-        when(postRepository.save(any(Post.class))).thenReturn(postForSave);
+        Post savedPost = postService.save(newPostDto);
 
-        postService.save(newPostDto);
-        verify(postMapper, times(1)).toEntity(any(NewPostDto.class));
-        verify(postRepository, times(1)).save(any(Post.class));
+        Post extractedPost = postService.findById(savedPost.getId());
+
+        assertNotNull(extractedPost);
+        assertEquals(1L, extractedPost.getId());
+        assertEquals("new title", extractedPost.getTitle());
+        assertEquals("new text", extractedPost.getText());
+        assertEquals("new_tag", extractedPost.getTags().getFirst());
     }
 
     @Test
     void SaveComment() {
-        NewCommentDto newCommentDto = new NewCommentDto();
-        postService.saveComment(1L, newCommentDto);
-        verify(postRepository, times(1)).save(1L, newCommentDto);
+        NewCommentDto newCommentDto = NewCommentDto.builder()
+                .postId(0L)
+                .text("zeroth comment")
+                .build();
+        postService.saveComment(0L, newCommentDto);
+
+        Comment comment = postService.getCommentsByPostIdAndCommentId("0", 0L);
+        assertEquals(0L, comment.getPostId());
+        assertEquals("zeroth comment", comment.getText());
     }
 
     @Test
     void deleteById() {
-        postService.deleteById(1L);
-        verify(postRepository, times(1)).deleteById(1L);
+        postService.deleteById(0L);
+
+        Post post = postService.findById(0L);
+        assertNull(post);
     }
 
     @Test
     void update_post_when_not_found() {
-        when(postRepository.findById(999L)).thenReturn(Optional.empty());
         IllegalArgumentException illegalArgumentException = assertThrows(
                 IllegalArgumentException.class,
                 () -> postService.update(999L, new PostUpdateDto())
@@ -88,14 +102,19 @@ class PostServiceInnerIntegrationTests {
 
     @Test
     void update_post() {
-        Post post = new Post();
-        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
-        when(postRepository.update(anyLong(), any(Post.class))).thenReturn(post);
+        PostUpdateDto postForUpdate = PostUpdateDto.builder()
+                .title("title updated")
+                .text("text updated")
+                .tags(List.of("tag_updated"))
+                .build();
 
-        postService.update(1L, new PostUpdateDto());
+        Post updated = postService.update(0L, postForUpdate);
 
-        verify(postRepository, times(1)).findById(1L);
-        verify(postRepository, times(1)).update(anyLong(), any(Post.class));
+        assertEquals(0L, updated.getId());
+        assertEquals("title updated", updated.getTitle());
+        assertEquals("text updated", updated.getText());
+        assertEquals("tag_updated", updated.getTags().getFirst());
+        assertEquals(1, updated.getTags().size());
     }
 
     @Test
@@ -115,6 +134,7 @@ class PostServiceInnerIntegrationTests {
         postService.incrementLike(1L);
         verify(postRepository, times(1)).likesIncrease(1L);
     }
+
     @Test
     void findById() {
         postService.findById(1L);

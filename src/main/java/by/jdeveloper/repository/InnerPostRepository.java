@@ -86,7 +86,7 @@ public class InnerPostRepository implements PostRepository {
 
     @Override
     public Comment save(Long postId, NewCommentDto newCommentDto) {
-        Map<Long, Comment> commentMap = commentStorage.getOrDefault(postId, new HashMap<>());
+        Map<Long, Comment> commentMap = commentStorage.computeIfAbsent(postId, k ->new HashMap<>());
         Comment comment = Comment.builder()
                 .id(commentCounter++)
                 .postId(newCommentDto.getPostId())
@@ -134,8 +134,17 @@ public class InnerPostRepository implements PostRepository {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    class Image {
+    static class Image {
         String fileName;
+        @Builder.Default
         byte[] data = new byte[0];
+    }
+
+    public void resetRepository() {
+        postCounter = 0L;
+        commentCounter = 0L;
+        this.postStorage.clear();
+        this.commentStorage.clear();
+        this.imageStorage.clear();
     }
 }
