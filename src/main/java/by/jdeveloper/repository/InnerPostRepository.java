@@ -4,6 +4,10 @@ import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.model.Comment;
 import by.jdeveloper.model.Post;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.awt.*;
@@ -15,6 +19,8 @@ import java.util.Optional;
 
 @Repository
 public class InnerPostRepository implements PostRepository {
+    static Long postCounter = 0L;
+    static Long commentCounter = 0L;
     private final Map<Long, Post> postStorage = new HashMap<>();
     private final Map<Long, Map<Long, Comment>> commentStorage = new HashMap<>();
     private final Map<Long, Image> imageStorage = new HashMap<>();
@@ -40,27 +46,37 @@ public class InnerPostRepository implements PostRepository {
 
     @Override
     public Post save(Post post) {
-        return null;
+        if (post != null) {
+            post.setId(postCounter++);
+            postStorage.put(post.getId(), post);
+        }
+        return post;
     }
 
     @Override
     public Post update(Long id, Post post) {
-        return null;
+        post.setId(id);
+        postStorage.put(id, post);
+        return post;
     }
 
     @Override
     public Optional<Post> findById(Long id) {
-        return Optional.empty();
+        Post post = postStorage.get(id);
+        return post == null ? Optional.empty() : Optional.of(post);
     }
 
     @Override
     public void deleteById(Long id) {
-
+        postStorage.remove(id);
     }
 
     @Override
     public Long likesIncrease(Long postId) {
-        return 0L;
+        Post post = postStorage.get(postId);
+        Long likesCount = post.getLikesCount();
+        post.setLikesCount(++likesCount);
+        return likesCount;
     }
 
     @Override
@@ -70,36 +86,56 @@ public class InnerPostRepository implements PostRepository {
 
     @Override
     public Comment save(Long postId, NewCommentDto newCommentDto) {
-        return null;
+        Map<Long, Comment> commentMap = commentStorage.getOrDefault(postId, new HashMap<>());
+        Comment comment = Comment.builder()
+                .id(commentCounter++)
+                .postId(newCommentDto.getPostId())
+                .text(newCommentDto.getText())
+                .build();
+        commentMap.put(comment.getId(), comment);
+        return comment;
     }
 
     @Override
     public Comment findCommentByPostIdAndCommentId(Long postId, Long commentId) {
-        return null;
+        return commentStorage.get(postId).get(commentId);
     }
 
     @Override
     public void deleteByPostIdAndCommentId(Long postId, Long commentId) {
-
+        commentStorage.get(postId).remove(commentId);
     }
 
     @Override
     public void saveFile(Long postId, String name, byte[] data) {
-
+        imageStorage.put(postId, new Image(name, data));
     }
 
     @Override
     public boolean updateFileByPostId(Long postId, String fileName, byte[] data) {
+        if (imageStorage.containsKey(postId)) {
+            imageStorage.put(postId, new Image(fileName, data));
+            return true;
+        }
         return false;
     }
 
     @Override
     public byte[] getFileByPostId(Long postId) {
-        return new byte[0];
+        return imageStorage.getOrDefault(postId, new Image()).data;
     }
 
     @Override
     public Long countFilesByPostId(Long postId) {
-        return 0L;
+        return imageStorage.containsKey(postId) ? 1L : 0L;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    class Image {
+        String fileName;
+        byte[] data = new byte[0];
     }
 }
