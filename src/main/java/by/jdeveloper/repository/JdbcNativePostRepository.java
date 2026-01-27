@@ -51,6 +51,7 @@ public class JdbcNativePostRepository implements PostRepository {
                             .text(rs.getString("text"))
                             .tags(tags)
                             .likesCount(rs.getLong("likes_count"))
+                            .commentsCount(rs.getLong("comments_count"))
                             .build();
                 },
                 "%" + search + "%"
@@ -105,6 +106,7 @@ public class JdbcNativePostRepository implements PostRepository {
                             .text(rs.getString("text"))
                             .tags(tags)
                             .likesCount(rs.getLong("likes_count"))
+                            .commentsCount(rs.getLong("comments_count"))
                             .build();
                 },
                 tag
@@ -192,6 +194,23 @@ public class JdbcNativePostRepository implements PostRepository {
             return ps;
         });
         return post;
+    }
+
+    @Override
+    public Comment updateComment(Long commentId, Comment comment) {
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    """
+                            update comment set text = ?
+                            where id = ?
+                            """,
+                    new String[]{"id"}
+            );
+            ps.setString(1, comment.getText());
+            ps.setLong(2, commentId);
+            return ps;
+        });
+        return comment;
     }
 
     @Override

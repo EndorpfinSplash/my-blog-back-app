@@ -63,6 +63,13 @@ public class InnerPostRepository implements PostRepository {
     }
 
     @Override
+    public Comment updateComment(Long commentId, Comment newComment) {
+        Comment comment = commentStorage.get(newComment.getPostId()).get(commentId);
+        comment.setText(newComment.getText());
+        return comment;
+    }
+
+    @Override
     public Optional<Post> findById(Long id) {
         Post post = postStorage.get(id);
         return post == null ? Optional.empty() : Optional.of(post);
