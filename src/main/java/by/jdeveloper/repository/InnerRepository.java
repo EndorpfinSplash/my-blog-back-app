@@ -1,5 +1,7 @@
 package by.jdeveloper.repository;
 
+import by.jdeveloper.dao.CommentRepository;
+import by.jdeveloper.dao.FileRepository;
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.model.Comment;
@@ -10,7 +12,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class InnerPostRepository implements PostRepository {
+public class InnerRepository implements PostRepository, CommentRepository, FileRepository {
     static Long postCounter = 0L;
     static Long commentCounter = 0L;
     private final Map<Long, Post> postStorage = new HashMap<>();
@@ -68,6 +69,7 @@ public class InnerPostRepository implements PostRepository {
         comment.setText(newComment.getText());
         return comment;
     }
+
 
     @Override
     public Optional<Post> findById(Long id) {

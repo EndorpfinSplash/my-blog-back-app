@@ -1,5 +1,6 @@
 package by.jdeveloper.controller;
 
+
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
 import by.jdeveloper.dto.PostUpdateDto;
@@ -10,6 +11,7 @@ import by.jdeveloper.service.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost")
 @RequestMapping("/api/posts")
 @AllArgsConstructor
 public class PostController {
@@ -90,6 +93,7 @@ public class PostController {
             @RequestBody NewCommentDto newCommentDto) {
         return service.saveComment(postId, newCommentDto);
     }
+
 
     @PutMapping(value = "/{id}/comments/{commentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Comment updateComment(@PathVariable(name = "id") Long id,
