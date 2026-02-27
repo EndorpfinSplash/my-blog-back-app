@@ -1,5 +1,7 @@
 package by.jdeveloper.service;
 
+
+import by.jdeveloper.dao.CommentRepository;
 import by.jdeveloper.dao.PostRepository;
 import by.jdeveloper.dto.NewCommentDto;
 import by.jdeveloper.dto.NewPostDto;
@@ -9,8 +11,8 @@ import by.jdeveloper.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,16 +20,23 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringJUnitConfig(UnitTestConfig.class)
-@ActiveProfiles("unit-tests")
+@SpringBootTest(classes = PostService.class)
 class PostServiceUnitTests {
 
-    @Autowired
+    @MockitoBean
     PostRepository postRepository;
 
-    @Autowired
+    @MockitoBean
+    CommentRepository commentRepository;
+
+    @MockitoBean
     PostMapper postMapper;
 
     @Autowired
@@ -36,6 +45,7 @@ class PostServiceUnitTests {
     @BeforeEach
     void resetMocks() {
         reset(postRepository);
+        reset(commentRepository);
         reset(postMapper);
     }
 
@@ -60,7 +70,7 @@ class PostServiceUnitTests {
     void SaveComment() {
         NewCommentDto newCommentDto = new NewCommentDto();
         postService.saveComment(1L, newCommentDto);
-        verify(postRepository, times(1)).save(1L, newCommentDto);
+        verify(commentRepository, times(1)).save(1L, newCommentDto);
     }
 
     @Test
@@ -124,7 +134,7 @@ class PostServiceUnitTests {
     @Test
     void getCommentsByPostId() {
         postService.getCommentsByPostId("1");
-        verify(postRepository, times(1)).findAllCommentsByPostId(1L);
+        verify(commentRepository, times(1)).findAllCommentsByPostId(1L);
     }
 
     @Test
@@ -134,13 +144,13 @@ class PostServiceUnitTests {
                 () -> postService.getCommentsByPostId("X")
         );
         assertEquals("Invalid postId!", illegalArgumentException.getMessage());
-        verify(postRepository, never()).findAllCommentsByPostId(any());
+        verify(commentRepository, never()).findAllCommentsByPostId(any());
     }
 
     @Test
     void getCommentsByPostIdAndCommentId() {
         postService.getCommentsByPostIdAndCommentId("1", 1L);
-        verify(postRepository, times(1)).findCommentByPostIdAndCommentId(1L, 1L);
+        verify(commentRepository, times(1)).findCommentByPostIdAndCommentId(1L, 1L);
     }
 
     @Test
@@ -150,7 +160,7 @@ class PostServiceUnitTests {
                 () -> postService.getCommentsByPostIdAndCommentId("X", 1L)
         );
         assertEquals("Invalid postId!", illegalArgumentException.getMessage());
-        verify(postRepository, never()).findAllCommentsByPostId(any());
+        verify(commentRepository, never()).findAllCommentsByPostId(any());
     }
 
     @Test

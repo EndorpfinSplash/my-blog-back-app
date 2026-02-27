@@ -1,30 +1,36 @@
-package by.jdeveloper.controller;
+package by.jdeveloper;
 
-import by.jdeveloper.configuration.DataSourceConfiguration;
-import by.jdeveloper.configuration.WebConfiguration;
+
+import jdk.jfr.Description;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringJUnitConfig(classes = {
-        DataSourceConfiguration.class,
-        WebConfiguration.class,
-})
-@WebAppConfiguration
-@TestPropertySource(locations = "classpath:test-application.properties")
+@SpringBootTest(
+        // Cоздаёт mock-версию веб-слоя, без запуска реального сервера
+        webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+        properties = {
+                "spring.sql.init.mode=always",
+                "spring.sql.init.schema-locations=classpath:schema-test.sql"
+        }
+)
 class IntegrationTests {
 
     @Autowired
@@ -63,6 +69,11 @@ class IntegrationTests {
                     ps.setInt(4, 0);
                 }
         );
+    }
+
+    @Test
+    @Description("Failed to load context")
+    void contextLoads() {
     }
 
     @Test
